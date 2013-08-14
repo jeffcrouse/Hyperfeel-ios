@@ -30,6 +30,11 @@
 		1FCE194E17BBE13500F3D256 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE194D17BBE13500F3D256 /* Accelerate.framework */; };
 		1FCE195017BBE13C00F3D256 /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE194F17BBE13C00F3D256 /* ExternalAccessory.framework */; };
 		1FCE195317BBF29E00F3D256 /* BrainView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE195217BBF29E00F3D256 /* BrainView.m */; };
+		1FD6C12617BC2584002864F7 /* Signal_Connected.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12117BC2584002864F7 /* Signal_Connected.png */; };
+		1FD6C12717BC2584002864F7 /* Signal_Connecting1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */; };
+		1FD6C12817BC2584002864F7 /* Signal_Connecting2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12317BC2584002864F7 /* Signal_Connecting2.png */; };
+		1FD6C12917BC2584002864F7 /* Signal_Connecting3.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12417BC2584002864F7 /* Signal_Connecting3.png */; };
+		1FD6C12A17BC2584002864F7 /* Signal_Disconnected.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12517BC2584002864F7 /* Signal_Disconnected.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +73,11 @@
 		1FCE194F17BBE13C00F3D256 /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		1FCE195117BBF29E00F3D256 /* BrainView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainView.h; sourceTree = "<group>"; };
 		1FCE195217BBF29E00F3D256 /* BrainView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainView.m; sourceTree = "<group>"; };
+		1FD6C12117BC2584002864F7 /* Signal_Connected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connected.png; sourceTree = "<group>"; };
+		1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting1.png; sourceTree = "<group>"; };
+		1FD6C12317BC2584002864F7 /* Signal_Connecting2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting2.png; sourceTree = "<group>"; };
+		1FD6C12417BC2584002864F7 /* Signal_Connecting3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting3.png; sourceTree = "<group>"; };
+		1FD6C12517BC2584002864F7 /* Signal_Disconnected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Disconnected.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +154,11 @@
 		1FCE191717BBD5E200F3D256 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1FD6C12117BC2584002864F7 /* Signal_Connected.png */,
+				1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */,
+				1FD6C12317BC2584002864F7 /* Signal_Connecting2.png */,
+				1FD6C12417BC2584002864F7 /* Signal_Connecting3.png */,
+				1FD6C12517BC2584002864F7 /* Signal_Disconnected.png */,
 				1FCE193317BBD5FB00F3D256 /* Settings.bundle */,
 				1FCE191817BBD5E200F3D256 /* BrainProxy-Info.plist */,
 				1FCE191917BBD5E200F3D256 /* InfoPlist.strings */,
@@ -237,6 +252,11 @@
 				1FCE192717BBD5E200F3D256 /* Default-568h@2x.png in Resources */,
 				1FCE192D17BBD5E200F3D256 /* ViewController.xib in Resources */,
 				1FCE193417BBD5FB00F3D256 /* Settings.bundle in Resources */,
+				1FD6C12617BC2584002864F7 /* Signal_Connected.png in Resources */,
+				1FD6C12717BC2584002864F7 /* Signal_Connecting1.png in Resources */,
+				1FD6C12817BC2584002864F7 /* Signal_Connecting2.png in Resources */,
+				1FD6C12917BC2584002864F7 /* Signal_Connecting3.png in Resources */,
+				1FD6C12A17BC2584002864F7 /* Signal_Disconnected.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
