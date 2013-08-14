@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Color</string>
+			<key>Key</key>
+			<string>color</string>
+			<key>Values</key>
+			<array>
+				<integer>16737123</integer>
+				<integer>16758318</integer>
+				<integer>14605888</integer>
+				<integer>5236284</integer>
+				<integer>47044</integer>
+				<integer>8611540</integer>
+				<integer>14891983</integer>
+			</array>
+			<key>Titles</key>
+			<array>
+				<string>Red</string>
+				<string>Orange</string>
+				<string>Yellow</string>
+				<string>Green</string>
+				<string>Blue</string>
+				<string>Indigo</string>
+				<string>Violet</string>
+			</array>
+			<key>DefaultValue</key>
+			<integer>5236284</integer>
+		</dict>
+		<dict>
+			<key>AutocapitalizationType</key>
+			<string>None</string>
+			<key>AutocorrectionType</key>
+			<string>No</string>
+			<key>DefaultValue</key>
+			<string>ws://brainz.io:8081</string>
+			<key>IsSecure</key>
+			<false/>
+			<key>Key</key>
+			<string>host</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+			<key>Title</key>
+			<string>Host</string>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+		</dict>
+	</array>
+	<key>StringsTable</key>
+	<string>Root</string>
+</dict>
+</plist>
