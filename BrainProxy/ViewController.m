@@ -13,10 +13,7 @@
 
 @end
 
-@implementation ViewController {
-    SRWebSocket *_webSocket;
-}
-
+@implementation ViewController 
 @synthesize labelWebsocketStatus;
 @synthesize submitButton, resetButton;
 @synthesize uiSwitch, tableView;
@@ -26,14 +23,18 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
+    
+    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"success" ofType:@"wav"]]), &successSound);
+    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &successSound);
+    
     _webSocket = nil;
-    [self wsConnect];
-    [NSTimer scheduledTimerWithTimeInterval: 0.5 target: self
-                                   selector: @selector(update:)
-                                   userInfo: nil repeats: YES];
-
     [self disableControls];
+    [self wsConnect];
+    //[NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector: @selector(update:) userInfo: nil repeats: YES];    
 }
+
+- (void) update:(NSTimer*)t { }
+
 
 - (void)enableControls
 {
@@ -76,20 +77,6 @@
     [_webSocket open];
 }
 
-- (void) update:(NSTimer*)t
-{
-    //NSLog(@"update");
-    /*
-    if([[TGAccessoryManager sharedTGAccessoryManager] accessory] == nil){
-         [labelTGAccessoryStatus setText:@"No device connected"];
-    } else {
-        [labelTGAccessoryStatus setText:[NSString stringWithFormat:@"connected to %@", [[[TGAccessoryManager sharedTGAccessoryManager] accessory] name]]];
-    }
-    */
-    
-    [[self tableView] performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-    //[tableView reloadData];
-}
 
 - (void)didReceiveMemoryWarning
 {
@@ -100,54 +87,16 @@
 
 
 #pragma mark - Button actions
-/*
-- (IBAction)startJourney:(id)sender
-{
-    NSLog(@"startJourney");
-    bSending = true;
-    
-   
-    NSNumber* color = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"color"]];
-    NSDictionary* data = @{@"color": color, @"route": @"start"};
 
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-
-    if(_webSocket != nil) {
-        [_webSocket send: jsonString];
-        bSending = true;
-    }
-     
-}
-
-- (IBAction)stopJourney:(id)sender
-{
-    NSLog(@"stopJourney");
-    
-    
-    NSNumber* color = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"color"]];
-    NSDictionary* data = @{@"color": color, @"route": @"stop"};
-    
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    
-    if(_webSocket != nil) {
-        [_webSocket send: jsonString];
-        bSending = false;
-    }
-}
-*/
 
 - (IBAction)submitJourney:(id)sender
 {
     NSLog(@"submitJourney");
     [uiSwitch setOn:NO animated:YES];
     
-    
-    NSNumber* color = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"color"]];
-    NSDictionary* data = @{@"color": color, @"route": @"submit"};
+    NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+    NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+    NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp};
     
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
@@ -162,9 +111,9 @@
 {
     NSLog(@"resetJourney");
     [uiSwitch setOn:NO animated:YES];
-    
-    NSNumber* color = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"color"]];
-    NSDictionary* data = @{@"color": color, @"route": @"reset"};
+    NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+    NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+    NSDictionary* data = @{@"client_id": client_id, @"route": @"reset", @"timestamp": timestamp};
     
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
@@ -200,11 +149,32 @@
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
 {
     NSLog(@"Received \"%@\"", message);
-    /*
-     [_messages addObject:[[TCMessage alloc] initWithMessage:message fromMe:NO]];
-     [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_messages.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-     [self.tableView scrollRectToVisible:self.tableView.tableFooterView.frame animated:YES];
-     */
+    
+    NSError *jsonError = nil;
+    NSData* data = [message dataUsingEncoding:NSUTF8StringEncoding];
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
+    
+    if ([jsonObject isKindOfClass:[NSArray class]]) {
+        NSArray *jsonArray = (NSArray *)jsonObject;
+        NSLog(@"jsonArray - %@",jsonArray);
+    }
+    else {
+        NSDictionary *dict = (NSDictionary *)jsonObject;
+        NSString* route = [dict valueForKey:@"route"];
+        
+        //NSLog(@"jsonDictionary - %@", dict);
+        if([route isEqualToString:@"saveStatus"]) {
+            if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
+                NSLog(@"OK!");
+                AudioServicesPlaySystemSound (successSound);
+            } else {
+                AudioServicesPlaySystemSound (errorSound);
+            }
+        }
+        
+        if([route isEqualToString:@"info"]) {
+        }
+    }
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
@@ -252,10 +222,7 @@
 //  This method gets called by the TGAccessoryManager when data is received from the
 //  ThinkGear-enabled device.
 - (void)dataReceived:(NSDictionary *)data {
-    //NSLog(@"dataReceived");
-    //[brainView onData:data];
-    
-    
+
     if([data valueForKey:@"blinkStrength"])
         blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
     
@@ -302,13 +269,16 @@
         eegValues.highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
     }
     
-    //[[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
+    [[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
+    
     
     if([uiSwitch isOn]) {
         
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        NSNumber* color = [NSNumber numberWithInt:[userDefaults integerForKey:@"color"]];
-        NSDictionary* message = @{@"color": color, @"route": @"data", @"data": data};
+        NSNumber* client_id = [NSNumber numberWithInt:[userDefaults integerForKey:@"client_id"]];
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        
+        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
         NSError *error;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
                                                        options:NSJSONWritingPrettyPrinted
@@ -317,7 +287,8 @@
             NSLog(@"Got an error: %@", error);
         } else {
             NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            NSLog(@"%@", jsonString);
+            //NSLog(@"%@", jsonString);
+            NSLog(@"sending reading...");
             if(_webSocket != nil) {
                 [_webSocket send: jsonString];
             }
@@ -327,44 +298,6 @@
 
 
 #pragma mark - Table view data source
-/*
-#pragma mark - Table view data source
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections.
-    return 3;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    switch(section) {
-        case 0: return 2;
-        case 1: return 8;
-        case 2: return 4;
-    }
-    // Return the number of rows in the section.
-    // Usually the number of items in your array (the one that holds your list)
-    return [items count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    //Where we configure the cell in each row
-    
-    NSInteger section = [indexPath indexAtPosition:0];
-    NSInteger field = [indexPath indexAtPosition:1];
-    
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell;
-    
-    cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-    }
-    // Configure the cell... setting the text of our cell's label
-    cell.textLabel.text = [items objectAtIndex:indexPath.row];
-    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", 10]];
-    return cell;
-}
-*/
-
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 4;

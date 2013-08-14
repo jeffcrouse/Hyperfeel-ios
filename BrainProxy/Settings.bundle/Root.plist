@@ -10,7 +10,7 @@
 			<key>Title</key>
 			<string>Color</string>
 			<key>Key</key>
-			<string>color</string>
+			<string>client_id</string>
 			<key>Values</key>
 			<array>
 				<integer>0</integer>
@@ -32,7 +32,7 @@
 				<string>Violet</string>
 			</array>
 			<key>DefaultValue</key>
-			<integer>5236284</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>AutocapitalizationType</key>
@@ -40,7 +40,7 @@
 			<key>AutocorrectionType</key>
 			<string>No</string>
 			<key>DefaultValue</key>
-			<string>ws://brainz.io:8081</string>
+			<string>ws://cheese.local:8081</string>
 			<key>IsSecure</key>
 			<false/>
 			<key>Key</key>

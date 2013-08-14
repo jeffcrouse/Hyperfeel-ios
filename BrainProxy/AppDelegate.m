@@ -20,12 +20,9 @@
     
     // Set the application defaults
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    //NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:@"ws://brainz.io:8080"
-     //                                                       forKey:@"host"];
-    NSDictionary *appDefaults = @{@"host" : @"ws://localhost:8081", @"color": [NSNumber numberWithInt:1]};
+    NSDictionary *appDefaults = @{@"host" : @"ws://cheese.local:8081", @"client_id": [NSNumber numberWithInt:1]};
     [defaults registerDefaults:appDefaults];
     [defaults synchronize];
-    
     
     self.viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
@@ -70,10 +67,10 @@
     [userDefaults synchronize];
       
     NSLog(@"applicationDidBecomeActive");
-    NSLog(@"%d", [userDefaults integerForKey:@"color"]);
+    NSLog(@"client_id = %d", [userDefaults integerForKey:@"client_id"]);
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     UIColor* color;
-    switch([userDefaults integerForKey:@"color"]) {
+    switch([userDefaults integerForKey:@"client_id"]) {
         case 0: color = UIColorFromRGB(0xFF6363); break;
         case 1: color = UIColorFromRGB(0xFFB62E); break;
         case 2: color = UIColorFromRGB(0xDEDE40); break;
