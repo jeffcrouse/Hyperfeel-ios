@@ -13,13 +13,13 @@
 			<string>color</string>
 			<key>Values</key>
 			<array>
-				<integer>16737123</integer>
-				<integer>16758318</integer>
-				<integer>14605888</integer>
-				<integer>5236284</integer>
-				<integer>47044</integer>
-				<integer>8611540</integer>
-				<integer>14891983</integer>
+				<integer>0</integer>
+				<integer>1</integer>
+				<integer>2</integer>
+				<integer>3</integer>
+				<integer>4</integer>
+				<integer>5</integer>
+				<integer>6</integer>
 			</array>
 			<key>Titles</key>
 			<array>

@@ -7,6 +7,7 @@
 //
 
 #import "BrainView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation BrainView
 
@@ -17,6 +18,9 @@
         // Initialization code
         self.opaque = YES;
         self.backgroundColor = [UIColor clearColor];
+        
+        self.layer.borderColor = [UIColor redColor].CGColor;
+        self.layer.borderWidth = 3.0f;
     }
     return self;
 }
@@ -25,13 +29,11 @@
 {
     NSLog(@"BrainView onData");
     
-
     if([data valueForKey:@"blinkStrength"])
         blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
     
-    if([data valueForKey:@"raw"]) {
+    if([data valueForKey:@"raw"]) 
         rawValue = [[data valueForKey:@"raw"] shortValue];
-    }
     
     if([data valueForKey:@"heartRate"])
         heartRate = [[data valueForKey:@"heartRate"] intValue];
@@ -42,20 +44,17 @@
         buffRawCount = 0;
     }
     
-    if([data valueForKey:@"respiration"]) {
+    if([data valueForKey:@"respiration"]) 
         respiration = [[data valueForKey:@"respiration"] floatValue];
-    }
     
-    if([data valueForKey:@"heartRateAverage"]) {
+    if([data valueForKey:@"heartRateAverage"])
         heartRateAverage = [[data valueForKey:@"heartRateAverage"] intValue];
-    }
-    if([data valueForKey:@"heartRateAcceleration"]) {
+        
+    if([data valueForKey:@"heartRateAcceleration"]) 
         heartRateAcceleration = [[data valueForKey:@"heartRateAcceleration"] intValue];
-    }
     
-    if([data valueForKey:@"rawCount"]) {
+    if([data valueForKey:@"rawCount"]) 
         rawCount = [[data valueForKey:@"rawCount"] intValue];
-    }
     
     
     // check to see whether the eSense values are there. if so, we assume that
@@ -63,7 +62,6 @@
     // a safe assumption.
     if([data valueForKey:@"eSenseAttention"]){
         
-
         eSenseValues.attention =    [[data valueForKey:@"eSenseAttention"] intValue];
         eSenseValues.meditation =   [[data valueForKey:@"eSenseMeditation"] intValue];
         
@@ -95,7 +93,6 @@
     CGContextFillRect(context, CGRectMake(0, 0, width, 20));
     
     width = (eSenseValues.meditation/100.0) * self.bounds.size.width;
-    
     
     CGContextSetFillColorWithColor(context, [UIColor colorWithRed:0.0 green:0.0 blue:1.0 alpha:1.0].CGColor);
     CGContextFillRect(context, CGRectMake(0, 20, width, 20));

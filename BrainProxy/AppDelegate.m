@@ -22,7 +22,7 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     //NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:@"ws://brainz.io:8080"
      //                                                       forKey:@"host"];
-    NSDictionary *appDefaults = @{@"host" : @"ws://brainz.io:8081", @"color" : [NSNumber numberWithInt:5236284]};
+    NSDictionary *appDefaults = @{@"host" : @"ws://localhost:8081", @"color": [NSNumber numberWithInt:1]};
     [defaults registerDefaults:appDefaults];
     [defaults synchronize];
     
@@ -31,30 +31,9 @@
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     
-    
-    TGAccessoryType accessoryType = (TGAccessoryType)[defaults integerForKey:@"accessory_type_preference"];
-    //
-    // to use a connection to the ThinkGear Connector for
-    // Simulated Data, uncomment the next line
-    //accessoryType = TGAccessoryTypeSimulated;
-    //
-    // NOTE: this wont do anything to get the simulated data stream
-    // started. See the ThinkGear Connector Guide.
-    //
-    BOOL rawEnabled = false; // [defaults boolForKey:@"raw_enabled"];
-    
-    if(rawEnabled) {
-        NSLog(@"rawEnabled: true");
-        // setup the TGAccessoryManager to dispatch dataReceived notifications every 0.05s (20 times per second)
-        [[TGAccessoryManager sharedTGAccessoryManager] setupManagerWithInterval:0.05 forAccessoryType:accessoryType];
-    } else {
-        NSLog(@"rawEnabled: false");
-        [[TGAccessoryManager sharedTGAccessoryManager] setupManagerWithInterval:0.1 forAccessoryType:accessoryType];
-    }
-    // set the root UIViewController as the delegate object.
+    [[TGAccessoryManager sharedTGAccessoryManager] setupManagerWithInterval:0.1 forAccessoryType:0];
     [[TGAccessoryManager sharedTGAccessoryManager] setDelegate:self.viewController];
-    [[TGAccessoryManager sharedTGAccessoryManager] setRawEnabled:rawEnabled];
-    
+    [[TGAccessoryManager sharedTGAccessoryManager] setRawEnabled:false];
     if([[TGAccessoryManager sharedTGAccessoryManager] accessory] != nil)
         [[TGAccessoryManager sharedTGAccessoryManager] startStream];
     else
@@ -89,11 +68,21 @@
 {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults synchronize];
-    
+      
     NSLog(@"applicationDidBecomeActive");
     NSLog(@"%d", [userDefaults integerForKey:@"color"]);
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    self.viewController.view.backgroundColor = UIColorFromRGB([userDefaults integerForKey:@"color"]);
+    UIColor* color;
+    switch([userDefaults integerForKey:@"color"]) {
+        case 0: color = UIColorFromRGB(0xFF6363); break;
+        case 1: color = UIColorFromRGB(0xFFB62E); break;
+        case 2: color = UIColorFromRGB(0xDEDE40); break;
+        case 3: color = UIColorFromRGB(0x4FE63C); break;
+        case 4: color = UIColorFromRGB(0x00B7C4); break;
+        case 5: color = UIColorFromRGB(0x8366D4); break;
+        case 6: color = UIColorFromRGB(0xE33BCF); break;
+    }
+    self.viewController.view.backgroundColor = color;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

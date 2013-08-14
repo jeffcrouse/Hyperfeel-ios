@@ -131,12 +131,12 @@
 				1FCE192017BBD5E200F3D256 /* AppDelegate.m */,
 				1FCE192817BBD5E200F3D256 /* ViewController.h */,
 				1FCE192917BBD5E200F3D256 /* ViewController.m */,
+				1FCE195117BBF29E00F3D256 /* BrainView.h */,
+				1FCE195217BBF29E00F3D256 /* BrainView.m */,
 				1FCE192B17BBD5E200F3D256 /* ViewController.xib */,
 				1FCE193517BBE01300F3D256 /* SocketRocket */,
 				1FCE193D17BBE01300F3D256 /* ThinkGear */,
 				1FCE191717BBD5E200F3D256 /* Supporting Files */,
-				1FCE195117BBF29E00F3D256 /* BrainView.h */,
-				1FCE195217BBF29E00F3D256 /* BrainView.m */,
 			);
 			path = BrainProxy;
 			sourceTree = "<group>";
@@ -384,6 +384,7 @@
 				1FCE193217BBD5E200F3D256 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

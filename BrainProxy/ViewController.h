@@ -25,19 +25,20 @@
 - (void)accessoryDidDisconnect;
 - (void)dataReceived:(NSDictionary *)data;
 
-
 // SocketRocket
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
 - (void)webSocketDidOpen:(SRWebSocket *)webSocket;
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 
-
-- (IBAction)startJourney:(id)sender;
-- (IBAction)stopJourney:(id)sender;
 - (IBAction)submitJourney:(id)sender;
+- (IBAction)resetJourney:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UILabel *labelTGAccessoryStatus;
+@property (nonatomic, retain) IBOutlet UILabel *labelWebsocket;
 @property (nonatomic, retain) IBOutlet UILabel *labelWebsocketStatus;
+@property (nonatomic, retain) IBOutlet UIButton *submitButton;
+@property (nonatomic, retain) IBOutlet UIButton *resetButton;
+@property (nonatomic, retain) IBOutlet UISwitch *uiSwitch;
 @property (nonatomic, retain) IBOutlet BrainView *brainView;
 @end
