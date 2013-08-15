@@ -26,7 +26,7 @@
     
     AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"success" ofType:@"wav"]]), &successSound);
     AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &successSound);
-    
+    poorSignalValue = 500;
     _webSocket = nil;
     [self disableControls];
     [self wsConnect];
@@ -102,9 +102,8 @@
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
     NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     
-    if(_webSocket != nil) {
+    if(_webSocket != nil)
         [_webSocket send: jsonString];
-    }
 }
 
 - (IBAction)resetJourney:(id)sender
@@ -119,14 +118,13 @@
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
     NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     
-    if(_webSocket != nil) {
+    if(_webSocket != nil)
         [_webSocket send: jsonString];
-    }
 }
 
+
+
 #pragma mark - SocketRocket
-
-
 
 - (void)webSocketDidOpen:(SRWebSocket *)webSocket;
 {
@@ -162,10 +160,8 @@
         NSDictionary *dict = (NSDictionary *)jsonObject;
         NSString* route = [dict valueForKey:@"route"];
         
-        //NSLog(@"jsonDictionary - %@", dict);
         if([route isEqualToString:@"saveStatus"]) {
             if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
-                NSLog(@"OK!");
                 AudioServicesPlaySystemSound (successSound);
             } else {
                 AudioServicesPlaySystemSound (errorSound);
@@ -189,8 +185,9 @@
 }
 
 
-#pragma mark - ThinkGear 
 
+
+#pragma mark - ThinkGear 
 
 //  This method gets called by the TGAccessoryManager when a ThinkGear-enabled
 //  accessory is connected.
@@ -299,6 +296,22 @@
 
 #pragma mark - Table view data source
 
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    switch(section){
+        case 0:
+            return @"Raw";
+        case 1:
+            return @"Status";
+        case 2:
+            return @"eSense";
+        case 3:
+            return @"EEG bands";
+        default:
+            return nil;
+    }
+    
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 4;
 }
@@ -306,16 +319,11 @@
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     switch(section){
-        case 0:
-            return 2;
-        case 1:
-            return 1;
-        case 2:
-            return 7;
-        case 3:
-            return 8;
-        default:
-            return 0;
+        case 0: return 2;
+        case 1: return 1;
+        case 2: return 7;
+        case 3: return 8;
+        default: return 0;
     }
 }
 
