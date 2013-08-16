@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F64D96317BEC23C00677F84 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F64D96217BEC23B00677F84 /* CoreMotion.framework */; };
 		1FCE191117BBD5E200F3D256 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191017BBD5E200F3D256 /* UIKit.framework */; };
 		1FCE191317BBD5E200F3D256 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191217BBD5E200F3D256 /* Foundation.framework */; };
 		1FCE191517BBD5E200F3D256 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191417BBD5E200F3D256 /* CoreGraphics.framework */; };
@@ -45,6 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1F64D96217BEC23B00677F84 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		1FCE190D17BBD5E200F3D256 /* BrainProxy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainProxy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FCE191017BBD5E200F3D256 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1FCE191217BBD5E200F3D256 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -99,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F64D96317BEC23C00677F84 /* CoreMotion.framework in Frameworks */,
 				1FD28B9517BC434300A0169D /* AudioToolbox.framework in Frameworks */,
 				1FCE195017BBE13C00F3D256 /* ExternalAccessory.framework in Frameworks */,
 				1FCE194E17BBE13500F3D256 /* Accelerate.framework in Frameworks */,
@@ -138,6 +141,7 @@
 		1FCE190F17BBD5E200F3D256 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1F64D96217BEC23B00677F84 /* CoreMotion.framework */,
 				1FD28B9417BC434300A0169D /* AudioToolbox.framework */,
 				1FCE194F17BBE13C00F3D256 /* ExternalAccessory.framework */,
 				1FCE194D17BBE13500F3D256 /* Accelerate.framework */,

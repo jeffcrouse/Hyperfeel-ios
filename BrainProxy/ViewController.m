@@ -14,7 +14,7 @@
 @end
 
 @implementation ViewController 
-@synthesize labelWebsocketStatus;
+@synthesize labelWebsocketStatus, labelReceived;
 @synthesize submitButton, resetButton;
 @synthesize uiSwitch, tableView;
 
@@ -23,17 +23,49 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    
+    // Set up sounds
     AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"success" ofType:@"wav"]]), &successSound);
-    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &successSound);
+    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &errorSound);
     poorSignalValue = 500;
+    
+    
+    
     _webSocket = nil;
     [self disableControls];
     [self wsConnect];
-    //[NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector: @selector(update:) userInfo: nil repeats: YES];    
+
+    
+    // Set up motion stuff...
+    self.motionManager = [[CMMotionManager alloc] init];
+    self.motionManager.accelerometerUpdateInterval = .2;
+    self.motionManager.gyroUpdateInterval = .2;
+    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
+                                             withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
+                                                 [self outputAccelertionData:accelerometerData.acceleration];
+                                             }];
+    [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
+                                    withHandler:^(CMGyroData *gyroData, NSError *error) {
+                                        [self outputRotationData:gyroData.rotationRate];
+                                    }];
+    
+    
+    //[NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector: @selector(update:) userInfo: nil repeats: YES];
 }
 
-- (void) update:(NSTimer*)t { }
+
+-(void)outputAccelertionData:(CMAcceleration)acceleration
+{
+    //NSLog(@"acceleration %.2fg, %.2fg, %.2fg", acceleration.x, acceleration.y, acceleration.z);
+}
+
+-(void)outputRotationData:(CMRotationRate)rotation
+{
+    //NSLog(@"rotation %.2fg, %.2fg, %.2fg", rotation.x, rotation.y, rotation.z);
+}
+
+- (void) update:(NSTimer*)t {
+ 
+}
 
 
 - (void)enableControls
@@ -92,11 +124,28 @@
 - (IBAction)submitJourney:(id)sender
 {
     NSLog(@"submitJourney");
+
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Please enter your email address:" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
+    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    UITextField * alertTextField = [alert textFieldAtIndex:0];
+    alertTextField.keyboardType = UIKeyboardTypeEmailAddress; 
+    alertTextField.placeholder = @"you@email.com";
+    [alert show];
+
     [uiSwitch setOn:NO animated:YES];
+    
+    /*
+         */
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    NSLog(@"Entered: %@",[[alertView textFieldAtIndex:0] text]);
+    
     
     NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
     NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-    NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp};
+    NSString* email = [[alertView textFieldAtIndex:0] text];
+    NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email};
     
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
@@ -104,6 +153,7 @@
     
     if(_webSocket != nil)
         [_webSocket send: jsonString];
+
 }
 
 - (IBAction)resetJourney:(id)sender
@@ -162,13 +212,16 @@
         
         if([route isEqualToString:@"saveStatus"]) {
             if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
+                NSLog(@"Success saving!");
                 AudioServicesPlaySystemSound (successSound);
             } else {
+                NSLog(@"Error saving!");
                 AudioServicesPlaySystemSound (errorSound);
             }
         }
         
         if([route isEqualToString:@"info"]) {
+            [labelReceived setText:[[dict valueForKey:@"numReadings"] stringValue]];
         }
     }
 }
