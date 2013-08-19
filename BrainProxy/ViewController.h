@@ -50,7 +50,9 @@ typedef struct {
     EEGValues eegValues;
     
     SRWebSocket *_webSocket;
-    
+    NSMutableArray* readings;
+    BOOL bRecording;
+    NSTimeInterval interval;
     SystemSoundID successSound;
     SystemSoundID errorSound;
 }
@@ -71,12 +73,16 @@ typedef struct {
 
 - (IBAction)submitJourney:(id)sender;
 - (IBAction)resetJourney:(id)sender;
+- (IBAction)toggleRecord:(id)sender;
+- (IBAction)identify:(id)sender;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
+@property (nonatomic, retain) IBOutlet UILabel *labelReadings;
+@property (nonatomic, retain) IBOutlet UILabel *labelTime;
 @property (nonatomic, retain) IBOutlet UILabel *labelWebsocketStatus;
-@property (nonatomic, retain) IBOutlet UILabel *labelReceived;
 @property (nonatomic, retain) IBOutlet UIButton *submitButton;
 @property (nonatomic, retain) IBOutlet UIButton *resetButton;
+@property (nonatomic, retain) IBOutlet UIButton *recordButton;
 @property (nonatomic, retain) IBOutlet UISwitch *uiSwitch;
 @property (nonatomic, retain) IBOutlet UITableView *tableView;
 @end

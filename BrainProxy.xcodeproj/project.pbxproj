@@ -33,16 +33,14 @@
 		1FCE195317BBF29E00F3D256 /* BrainView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FCE195217BBF29E00F3D256 /* BrainView.m */; };
 		1FD28B9317BC3E2300A0169D /* success.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9217BC3E2300A0169D /* success.wav */; };
 		1FD28B9517BC434300A0169D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FD28B9417BC434300A0169D /* AudioToolbox.framework */; };
-		1FD28B9817BC4BE300A0169D /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9617BC4BE300A0169D /* Icon.png */; };
-		1FD28B9917BC4BE300A0169D /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9717BC4BE300A0169D /* Icon@2x.png */; };
-		1FD28B9B17BC4BF200A0169D /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9A17BC4BF200A0169D /* Icon.png */; };
-		1FD28B9D17BC4BF700A0169D /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9C17BC4BF700A0169D /* Icon@2x.png */; };
 		1FD28B9F17BC4CA400A0169D /* error.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FD28B9E17BC4CA400A0169D /* error.wav */; };
 		1FD6C12617BC2584002864F7 /* Signal_Connected.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12117BC2584002864F7 /* Signal_Connected.png */; };
 		1FD6C12717BC2584002864F7 /* Signal_Connecting1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */; };
 		1FD6C12817BC2584002864F7 /* Signal_Connecting2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12317BC2584002864F7 /* Signal_Connecting2.png */; };
 		1FD6C12917BC2584002864F7 /* Signal_Connecting3.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12417BC2584002864F7 /* Signal_Connecting3.png */; };
 		1FD6C12A17BC2584002864F7 /* Signal_Disconnected.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FD6C12517BC2584002864F7 /* Signal_Disconnected.png */; };
+		1FE7107517C112E100E67ED9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FE7107317C112E100E67ED9 /* Icon.png */; };
+		1FE7107617C112E100E67ED9 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FE7107417C112E100E67ED9 /* Icon@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,16 +82,14 @@
 		1FCE195217BBF29E00F3D256 /* BrainView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainView.m; sourceTree = "<group>"; };
 		1FD28B9217BC3E2300A0169D /* success.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = success.wav; sourceTree = "<group>"; };
 		1FD28B9417BC434300A0169D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		1FD28B9617BC4BE300A0169D /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
-		1FD28B9717BC4BE300A0169D /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
-		1FD28B9A17BC4BF200A0169D /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
-		1FD28B9C17BC4BF700A0169D /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		1FD28B9E17BC4CA400A0169D /* error.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = error.wav; sourceTree = "<group>"; };
 		1FD6C12117BC2584002864F7 /* Signal_Connected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connected.png; sourceTree = "<group>"; };
 		1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting1.png; sourceTree = "<group>"; };
 		1FD6C12317BC2584002864F7 /* Signal_Connecting2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting2.png; sourceTree = "<group>"; };
 		1FD6C12417BC2584002864F7 /* Signal_Connecting3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Connecting3.png; sourceTree = "<group>"; };
 		1FD6C12517BC2584002864F7 /* Signal_Disconnected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Signal_Disconnected.png; sourceTree = "<group>"; };
+		1FE7107317C112E100E67ED9 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		1FE7107417C112E100E67ED9 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,8 +118,6 @@
 		1FCE190417BBD5E200F3D256 = {
 			isa = PBXGroup;
 			children = (
-				1FD28B9C17BC4BF700A0169D /* Icon@2x.png */,
-				1FD28B9A17BC4BF200A0169D /* Icon.png */,
 				1FCE191617BBD5E200F3D256 /* BrainProxy */,
 				1FCE190F17BBD5E200F3D256 /* Frameworks */,
 				1FCE190E17BBD5E200F3D256 /* Products */,
@@ -176,9 +170,9 @@
 		1FCE191717BBD5E200F3D256 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1FE7107317C112E100E67ED9 /* Icon.png */,
+				1FE7107417C112E100E67ED9 /* Icon@2x.png */,
 				1FD28B9E17BC4CA400A0169D /* error.wav */,
-				1FD28B9617BC4BE300A0169D /* Icon.png */,
-				1FD28B9717BC4BE300A0169D /* Icon@2x.png */,
 				1FD28B9217BC3E2300A0169D /* success.wav */,
 				1FD6C12117BC2584002864F7 /* Signal_Connected.png */,
 				1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */,
@@ -284,11 +278,9 @@
 				1FD6C12917BC2584002864F7 /* Signal_Connecting3.png in Resources */,
 				1FD6C12A17BC2584002864F7 /* Signal_Disconnected.png in Resources */,
 				1FD28B9317BC3E2300A0169D /* success.wav in Resources */,
-				1FD28B9817BC4BE300A0169D /* Icon.png in Resources */,
-				1FD28B9917BC4BE300A0169D /* Icon@2x.png in Resources */,
-				1FD28B9B17BC4BF200A0169D /* Icon.png in Resources */,
-				1FD28B9D17BC4BF700A0169D /* Icon@2x.png in Resources */,
 				1FD28B9F17BC4CA400A0169D /* error.wav in Resources */,
+				1FE7107517C112E100E67ED9 /* Icon.png in Resources */,
+				1FE7107617C112E100E67ED9 /* Icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

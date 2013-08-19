@@ -9,14 +9,17 @@
 #import "ViewController.h"
 
 
-@interface ViewController ()
+@interface ViewController () {
+    
+}
 
 @end
 
 @implementation ViewController 
-@synthesize labelWebsocketStatus, labelReceived;
-@synthesize submitButton, resetButton;
+@synthesize labelReadings, labelTime, labelWebsocketStatus;
+@synthesize recordButton, submitButton, resetButton;
 @synthesize uiSwitch, tableView;
+
 
 - (void)viewDidLoad
 {
@@ -28,7 +31,8 @@
     AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &errorSound);
     poorSignalValue = 500;
     
-    
+    bRecording = NO;
+    readings = [NSMutableArray arrayWithObjects: nil];
     
     _webSocket = nil;
     [self disableControls];
@@ -48,8 +52,7 @@
                                         [self outputRotationData:gyroData.rotationRate];
                                     }];
     
-    
-    //[NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector: @selector(update:) userInfo: nil repeats: YES];
+    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
 }
 
 
@@ -64,7 +67,18 @@
 }
 
 - (void) update:(NSTimer*)t {
- 
+    if(bRecording) {
+        interval += [t timeInterval];
+    }
+    
+    NSInteger ti = (NSInteger)interval;
+    NSInteger seconds = ti % 60;
+    NSInteger minutes = (ti / 60) % 60;
+    NSInteger hours = (ti / 3600);
+    NSString* time = [NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds];
+    
+    [labelReadings setText:[NSString stringWithFormat:@"%d", [readings count]]];
+    [labelTime setText:time];
 }
 
 
@@ -75,6 +89,9 @@
     
     resetButton.alpha = 1;
     resetButton.enabled = YES;
+    
+    recordButton.alpha = 1;
+    recordButton.enabled = YES;
     
     uiSwitch.alpha = 1;
     resetButton.enabled = YES;
@@ -87,6 +104,9 @@
     
     resetButton.alpha = 0.4;
     resetButton.enabled = NO;
+    
+    recordButton.alpha = 0.4;
+    recordButton.enabled = NO;
     
     uiSwitch.alpha = 0.4;
     resetButton.enabled = NO;
@@ -127,42 +147,63 @@
 
     UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Please enter your email address:" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
     alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    alert.tag = 100;
+    
     UITextField * alertTextField = [alert textFieldAtIndex:0];
     alertTextField.keyboardType = UIKeyboardTypeEmailAddress; 
     alertTextField.placeholder = @"you@email.com";
     [alert show];
-
-    [uiSwitch setOn:NO animated:YES];
     
-    /*
-         */
+    [recordButton setTitle:@"Record" forState:UIControlStateNormal];
+    bRecording = NO;
+    //[uiSwitch setOn:NO animated:YES];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
-    NSLog(@"Entered: %@",[[alertView textFieldAtIndex:0] text]);
-    
-    
-    NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-    NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-    NSString* email = [[alertView textFieldAtIndex:0] text];
-    NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email};
-    
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    
-    if(_webSocket != nil)
-        [_webSocket send: jsonString];
+
+    if(alertView.tag==100)
+    {
+        NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+        NSString* email = [[alertView textFieldAtIndex:0] text];
+        NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email, @"readings": readings};
+        
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        
+        if(_webSocket != nil)
+            [_webSocket send: jsonString];
+    }
+
 
 }
 
 - (IBAction)resetJourney:(id)sender
 {
-    NSLog(@"resetJourney");
-    [uiSwitch setOn:NO animated:YES];
-    NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+    NSLog(@"resetJourney");    
+    [recordButton setTitle:@"Record" forState:UIControlStateNormal];
+    bRecording = NO;
+    [readings removeAllObjects];
+    interval = 0;
+}
+
+-(IBAction)toggleRecord:(id)sender
+{
+    if(bRecording) {
+        [recordButton setTitle:@"Record" forState:UIControlStateNormal];
+        bRecording = NO;
+    } else {
+       [recordButton setTitle:@"Stop" forState:UIControlStateNormal];
+        bRecording = YES;
+    }
+}
+
+- (IBAction)identify:(id)sender
+{
     NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-    NSDictionary* data = @{@"client_id": client_id, @"route": @"reset", @"timestamp": timestamp};
+    NSDictionary* data = @{@"client_id": client_id, @"route": @"identify"};
     
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
@@ -171,7 +212,6 @@
     if(_webSocket != nil)
         [_webSocket send: jsonString];
 }
-
 
 
 #pragma mark - SocketRocket
@@ -180,14 +220,15 @@
 {
     NSLog(@"Websocket Connected");
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [labelWebsocketStatus setText:[NSString stringWithFormat:@"Connected to %@", [userDefaults stringForKey:@"host"]]];
+    NSLog(@"%@", [NSString stringWithFormat:@"Connected to %@", [userDefaults stringForKey:@"host"]]);
+    [labelWebsocketStatus setText:@"Open"];
     [self enableControls];
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 {
     NSLog(@":( Websocket Failed With Error %@", error);
-    [labelWebsocketStatus setText:[error localizedDescription]];
+    [labelWebsocketStatus setText:@"Error"];
      _webSocket = nil;
     [self disableControls];
     [NSTimer scheduledTimerWithTimeInterval: 5.0 target: self
@@ -214,14 +255,19 @@
             if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
                 NSLog(@"Success saving!");
                 AudioServicesPlaySystemSound (successSound);
+                
+                [readings removeAllObjects];
+                interval = 0;
             } else {
                 NSLog(@"Error saving!");
                 AudioServicesPlaySystemSound (errorSound);
+                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[dict valueForKey:@"status"]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                alert.tag = 101;
+                [alert show];
+
             }
-        }
-        
-        if([route isEqualToString:@"info"]) {
-            [labelReceived setText:[[dict valueForKey:@"numReadings"] stringValue]];
+        } else {
+            NSLog(@"UNKNOWN ROUTE!");
         }
     }
 }
@@ -229,7 +275,7 @@
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 {
     NSLog(@"WebSocket closed");
-    [labelWebsocketStatus setText:@"Connection Closed!"];
+    [labelWebsocketStatus setText:@"Closed"];
      _webSocket = nil;
     [self disableControls];
     
@@ -343,6 +389,12 @@
                 [_webSocket send: jsonString];
             }
         }
+    }
+    
+    if(bRecording) {
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSDictionary* message = @{@"reading": data, @"timestamp":timestamp};
+        [readings addObject:message];
     }
 }
 
