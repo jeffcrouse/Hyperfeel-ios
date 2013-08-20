@@ -46,33 +46,39 @@
 
     
     // Set up motion stuff...
+    float motionInterval = 0.1;
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.accelerometerUpdateInterval = .2;
-    self.motionManager.gyroUpdateInterval = .2;
+    self.motionManager.accelerometerUpdateInterval = motionInterval;
+    self.motionManager.gyroUpdateInterval = motionInterval;
+    self.motionManager.deviceMotionUpdateInterval = motionInterval;
+    
     [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
                                              withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
-                                                 [self outputAccelertionData:accelerometerData.acceleration];
+                                                 acc = accelerometerData.acceleration;
                                              }];
     [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
-                                    withHandler:^(CMGyroData *gyroData, NSError *error) {
-                                        [self outputRotationData:gyroData.rotationRate];
-                                    }];
+                                            withHandler:^(CMGyroData *gyroData, NSError *error) {
+                                                rot = gyroData.rotationRate;
+                                            }];
     
+    [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue currentQueue]
+                                            withHandler:^(CMDeviceMotion *motion, NSError *error){
+                                                attitude = [motion attitude];
+                                                rotationRate = [motion rotationRate];
+                                                userAcceleration = [motion userAcceleration];
+                                            }];
+   
+    [self becomeFirstResponder];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
+    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(sampleMotionData:) userInfo: nil repeats: YES];
 }
 
 
--(void)outputAccelertionData:(CMAcceleration)acceleration
-{
-    acc = acceleration;
-    //NSLog(@"acceleration %.2fg, %.2fg, %.2fg", acceleration.x, acceleration.y, acceleration.z);
+
+- (BOOL)canBecomeFirstResponder {
+    return YES;
 }
 
--(void)outputRotationData:(CMRotationRate)rotation
-{
-    rot = rotation;
-    //NSLog(@"rotation %.2fg, %.2fg, %.2fg", rotation.x, rotation.y, rotation.z);
-}
 
 - (void) update:(NSTimer*)t {
     if(bRecording) {
@@ -87,7 +93,23 @@
     
     [labelReadings setText:[NSString stringWithFormat:@"%d", [readings count]]];
     [labelTime setText:time];
+    
+    
+    if([readings count] > 40) {
+        submitButton.alpha = 1;
+        submitButton.enabled = YES;
+        
+        resetButton.alpha = 1;
+        resetButton.enabled = YES;
+    } else {
+        submitButton.alpha = 0.4;
+        submitButton.enabled = NO;
+        
+        resetButton.alpha = 0.4;
+        resetButton.enabled = NO;
+    }
 }
+
 
 
 - (void)enableControls
@@ -115,7 +137,7 @@
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults synchronize];
     
-    [labelWebsocketStatus setText:[NSString stringWithFormat:@"Connecting to %@", [userDefaults stringForKey:@"host"]]];
+    [labelWebsocketStatus setText:@"Connecting..."];
     
     NSLog( @"host = %@", [userDefaults stringForKey:@"host"] );
     
@@ -131,6 +153,98 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
+
+- (void)processReading:(NSDictionary *)data
+{
+    if([uiSwitch isOn]) // streaming
+    {
+        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        
+        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
+                                                           options:NSJSONWritingPrettyPrinted
+                                                             error:&error];
+        if (!jsonData) {
+            NSLog(@"Got an error: %@", error);
+        } else {
+            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            //NSLog(@"%@", jsonString);
+            NSLog(@"sending reading...");
+            if(_webSocket != nil) {
+                [_webSocket send: jsonString];
+            }
+        }
+    }
+    
+    if(bRecording)
+    {
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
+        [readings addObject:message];
+    }
+}
+
+
+
+#pragma mark - Motion handlers
+
+- (void) sampleMotionData:(NSTimer*)t
+{
+    if([uiSwitch isOn])
+    {
+        NSDictionary* data = @{@"attitude": @{@"yaw": [NSNumber numberWithDouble: attitude.yaw],
+                                              @"pitch": [NSNumber numberWithDouble: attitude.pitch],
+                                              @"roll": [NSNumber numberWithDouble: attitude.roll] },
+                               @"acceleration": @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
+                                                   @"y": [NSNumber numberWithDouble: userAcceleration.y],
+                                                   @"z": [NSNumber numberWithDouble: userAcceleration.z]}
+                               };
+        
+        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
+                                                           options:NSJSONWritingPrettyPrinted
+                                                             error:&error];
+        if (!jsonData) {
+            NSLog(@"Got an error: %@", error);
+        } else {
+            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            if(_webSocket != nil)
+                [_webSocket send: jsonString];
+        }
+    }
+}
+
+- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+    if (motion == UIEventSubtypeMotionShake)
+    {
+        // User was shaking the device.
+        NSLog(@"Shake motionBegan");
+        NSDictionary* reading = @{@"shake":
+                                        @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
+                                          @"y": [NSNumber numberWithDouble: userAcceleration.y],
+                                          @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
+        [self processReading:reading];
+    }
+}
+
+- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+    if (motion == UIEventSubtypeMotionShake)
+    {
+        // User was shaking the device.
+        NSLog(@"Shake motionEnded");
+    }
+}
+
+
 
 
 
@@ -181,11 +295,6 @@
     bRecording = NO;
     [readings removeAllObjects];
     interval = 0;
-    
-    submitButton.alpha = 0.4;
-    submitButton.enabled = NO;
-    resetButton.alpha = 0.4;
-    resetButton.enabled = NO;
 }
 
 -(IBAction)toggleRecord:(id)sender
@@ -257,10 +366,6 @@
                 
                 [readings removeAllObjects];
                 interval = 0;
-                submitButton.alpha = 0.4;
-                submitButton.enabled = NO;
-                resetButton.alpha = 0.4;
-                resetButton.enabled = NO;
                 
             } else {
                 NSLog(@"Error saving!");
@@ -283,7 +388,7 @@
      _webSocket = nil;
     [self disableControls];
     
-    [NSTimer scheduledTimerWithTimeInterval: 5.0 target: self
+    [NSTimer scheduledTimerWithTimeInterval: 3.0 target: self
                                    selector: @selector(wsConnect) userInfo: nil repeats: NO];
 }
 
@@ -372,42 +477,7 @@
     //[[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
     [tableView reloadData];
     
-    if([uiSwitch isOn]) {
-        
-        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        NSNumber* client_id = [NSNumber numberWithInt:[userDefaults integerForKey:@"client_id"]];
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        
-        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
-                                                       options:NSJSONWritingPrettyPrinted
-                                                         error:&error];
-        if (!jsonData) {
-            NSLog(@"Got an error: %@", error);
-        } else {
-            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            //NSLog(@"%@", jsonString);
-            NSLog(@"sending reading...");
-            if(_webSocket != nil) {
-                [_webSocket send: jsonString];
-            }
-        }
-    }
-    
-    if(bRecording) {
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
-        [readings addObject:message];
-        
-        if([readings count] > 40) {
-            submitButton.alpha = 1;
-            submitButton.enabled = YES;
-            
-            resetButton.alpha = 1;
-            resetButton.enabled = YES;
-        }
-    }
+    [self processReading: data];
 }
 
 
@@ -415,8 +485,6 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     switch(section){
-        //case 0:
-            //return @"Raw";
         case 0:
             return @"Status";
         case 1:
@@ -436,7 +504,6 @@
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     switch(section){
-        //case 0: return 2;
         case 0: return 1;
         case 1: return 3;
         case 2: return 8;
@@ -486,22 +553,6 @@
     
 	// Configure the cell.
     switch(section){
-        /*
-        case 0:
-            switch(field){
-                case 0:
-                    [[cell textLabel] setText:@"Sensor value"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", rawValue]];
-                    break;
-                case 1:
-                    [[cell textLabel] setText:@"Raw count"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", rawCount]];
-                default:
-                    break;
-            }
-            
-            break;
-             */
         case 0:
             switch(field){
                 case 0:

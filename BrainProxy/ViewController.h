@@ -55,7 +55,11 @@ typedef struct {
     NSTimeInterval interval;
     SystemSoundID successSound;
     SystemSoundID errorSound;
+
+    CMAttitude* attitude;
+    CMRotationRate rotationRate;
     CMAcceleration acc;
+    CMAcceleration userAcceleration;
     CMRotationRate rot;
 }
 
