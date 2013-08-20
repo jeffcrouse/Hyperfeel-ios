@@ -55,6 +55,8 @@ typedef struct {
     NSTimeInterval interval;
     SystemSoundID successSound;
     SystemSoundID errorSound;
+    CMAcceleration acc;
+    CMRotationRate rot;
 }
 
 - (void) update:(NSTimer*)t;

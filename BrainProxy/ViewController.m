@@ -34,6 +34,12 @@
     bRecording = NO;
     readings = [NSMutableArray arrayWithObjects: nil];
     
+    submitButton.alpha = 0.4;
+    submitButton.enabled = NO;
+    resetButton.alpha = 0.4;
+    resetButton.enabled = NO;
+    
+    
     _webSocket = nil;
     [self disableControls];
     [self wsConnect];
@@ -58,11 +64,13 @@
 
 -(void)outputAccelertionData:(CMAcceleration)acceleration
 {
+    acc = acceleration;
     //NSLog(@"acceleration %.2fg, %.2fg, %.2fg", acceleration.x, acceleration.y, acceleration.z);
 }
 
 -(void)outputRotationData:(CMRotationRate)rotation
 {
+    rot = rotation;
     //NSLog(@"rotation %.2fg, %.2fg, %.2fg", rotation.x, rotation.y, rotation.z);
 }
 
@@ -83,28 +91,15 @@
 
 
 - (void)enableControls
-{
-    submitButton.alpha = 1;
-    submitButton.enabled = YES;
-    
-    resetButton.alpha = 1;
-    resetButton.enabled = YES;
-    
+{    
     recordButton.alpha = 1;
     recordButton.enabled = YES;
     
     uiSwitch.alpha = 1;
-    resetButton.enabled = YES;
 }
 
 - (void)disableControls
-{
-    submitButton.alpha = 0.4;
-    submitButton.enabled = NO;
-    
-    resetButton.alpha = 0.4;
-    resetButton.enabled = NO;
-    
+{    
     recordButton.alpha = 0.4;
     recordButton.enabled = NO;
     
@@ -113,6 +108,7 @@
     
     [uiSwitch setOn:NO];
 }
+
 
 - (void)wsConnect
 {
@@ -176,8 +172,6 @@
         if(_webSocket != nil)
             [_webSocket send: jsonString];
     }
-
-
 }
 
 - (IBAction)resetJourney:(id)sender
@@ -187,6 +181,11 @@
     bRecording = NO;
     [readings removeAllObjects];
     interval = 0;
+    
+    submitButton.alpha = 0.4;
+    submitButton.enabled = NO;
+    resetButton.alpha = 0.4;
+    resetButton.enabled = NO;
 }
 
 -(IBAction)toggleRecord:(id)sender
@@ -258,6 +257,11 @@
                 
                 [readings removeAllObjects];
                 interval = 0;
+                submitButton.alpha = 0.4;
+                submitButton.enabled = NO;
+                resetButton.alpha = 0.4;
+                resetButton.enabled = NO;
+                
             } else {
                 NSLog(@"Error saving!");
                 AudioServicesPlaySystemSound (errorSound);
@@ -365,8 +369,8 @@
         eegValues.highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
     }
     
-    [[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
-    
+    //[[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
+    [tableView reloadData];
     
     if([uiSwitch isOn]) {
         
@@ -393,8 +397,16 @@
     
     if(bRecording) {
         NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSDictionary* message = @{@"reading": data, @"timestamp":timestamp};
+        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
         [readings addObject:message];
+        
+        if([readings count] > 40) {
+            submitButton.alpha = 1;
+            submitButton.enabled = YES;
+            
+            resetButton.alpha = 1;
+            resetButton.enabled = YES;
+        }
     }
 }
 
@@ -403,13 +415,13 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     switch(section){
+        //case 0:
+            //return @"Raw";
         case 0:
-            return @"Raw";
-        case 1:
             return @"Status";
-        case 2:
+        case 1:
             return @"eSense";
-        case 3:
+        case 2:
             return @"EEG bands";
         default:
             return nil;
@@ -418,16 +430,16 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 4;
+    return 3;
 }
 
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     switch(section){
-        case 0: return 2;
-        case 1: return 1;
-        case 2: return 7;
-        case 3: return 8;
+        //case 0: return 2;
+        case 0: return 1;
+        case 1: return 3;
+        case 2: return 8;
         default: return 0;
     }
 }
@@ -465,9 +477,16 @@
     NSInteger section = [indexPath indexAtPosition:0];
     NSInteger field = [indexPath indexAtPosition:1];
     
+    
+    // Clear out leftover crud from dequeueReusableCellWithIdentifier
     cell.imageView.image = nil;
+    cell.accessoryView = nil;
+    [[cell detailTextLabel] setText: nil];
+    
+    
 	// Configure the cell.
     switch(section){
+        /*
         case 0:
             switch(field){
                 case 0:
@@ -482,19 +501,22 @@
             }
             
             break;
-        case 1:
+             */
+        case 0:
             switch(field){
                 case 0:
-                    [[cell textLabel] setText:@"Poor signal"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", poorSignalValue]];
-                    [[cell imageView] setImage:[self updateSignalStatus]];
+                    [[cell textLabel] setText:@"Signal Strength"];
+                    //[[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", poorSignalValue]];
+                    //[[cell imageView] setImage:[self updateSignalStatus]];
+                    //cell.accessoryView = [self updateSignalStatus];
+                    cell.accessoryView = [[UIImageView alloc] initWithImage:[self updateSignalStatus]];
                     break;
                 default:
                     break;
             }
             
             break;
-        case 2:
+        case 1:
             switch(field){
                 case 0:
                     [[cell textLabel] setText:@"Attention"];
@@ -508,6 +530,7 @@
                     [[cell textLabel] setText:@"Blink strength"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", blinkStrength]];
                     break;
+                /*
                 case 3:
                     [[cell textLabel] setText:@"Heart rate"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", heartRate]];
@@ -524,12 +547,13 @@
                     [[cell textLabel] setText:@"Heart Rate Acceleration"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", heartRateAcceleration]];
                     break;
+                */
                 default:
                     break;
             }
             
             break;
-        case 3:
+        case 2:
             switch(field){
                 case 0:
                     [[cell textLabel] setText:@"Delta"];
