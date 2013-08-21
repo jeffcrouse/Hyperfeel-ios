@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1FCE190C17BBD5E200F3D256"
+               BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
                BuildableName = "BrainProxy.app"
                BlueprintName = "BrainProxy"
                ReferencedContainer = "container:BrainProxy.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1FCE190C17BBD5E200F3D256"
+            BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
             BlueprintName = "BrainProxy"
             ReferencedContainer = "container:BrainProxy.xcodeproj">
@@ -51,7 +51,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1FCE190C17BBD5E200F3D256"
+            BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
             BlueprintName = "BrainProxy"
             ReferencedContainer = "container:BrainProxy.xcodeproj">
@@ -69,7 +69,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1FCE190C17BBD5E200F3D256"
+            BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
             BlueprintName = "BrainProxy"
             ReferencedContainer = "container:BrainProxy.xcodeproj">

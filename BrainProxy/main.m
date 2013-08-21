@@ -2,7 +2,7 @@
 //  main.m
 //  BrainProxy
 //
-//  Created by Jeffrey Crouse on 8/14/13.
+//  Created by Jeffrey Crouse on 8/21/13.
 //  Copyright (c) 2013 Jeffrey Crouse. All rights reserved.
 //
 

@@ -2,168 +2,185 @@
 //  ViewController.m
 //  BrainProxy
 //
-//  Created by Jeffrey Crouse on 8/14/13.
+//  Created by Jeffrey Crouse on 8/21/13.
 //  Copyright (c) 2013 Jeffrey Crouse. All rights reserved.
 //
 
 #import "ViewController.h"
 
 
-@interface ViewController () {
-    
-}
+
+@interface ViewController ()
 
 @end
 
-@implementation ViewController 
-@synthesize labelReadings, labelTime, labelWebsocketStatus;
-@synthesize recordButton, submitButton, resetButton;
-@synthesize uiSwitch, tableView;
+@implementation ViewController
 
+@synthesize recordButton, playButton;
+@synthesize soundSwitch;
+@synthesize motionManager;
+@synthesize audioController;
+@synthesize successSound, errorSound, blinkSound, shakeSound, ambientLoop1;
+
+- (id)initWithStyle:(UITableViewStyle)style
+{
+    self = [super initWithStyle:style];
+    if (self) {
+        
+    }
+    return self;
+}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-    
-    // Set up sounds
-    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"success" ofType:@"wav"]]), &successSound);
-    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"error" ofType:@"wav"]]), &errorSound);
-    poorSignalValue = 500;
-    
-    bRecording = NO;
-    readings = [NSMutableArray arrayWithObjects: nil];
-    
-    submitButton.alpha = 0.4;
-    submitButton.enabled = NO;
-    resetButton.alpha = 0.4;
-    resetButton.enabled = NO;
     
     
-    _webSocket = nil;
-    [self disableControls];
-    [self wsConnect];
-
     
-    // Set up motion stuff...
-    float motionInterval = 0.1;
+    //
+    //  headerView
+    //
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 100)];
+    headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    self.recordButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [recordButton setTitle:@"Record" forState:UIControlStateNormal];
+    [recordButton setTitle:@"Stop" forState:UIControlStateSelected];
+    [recordButton addTarget:self action:@selector(record:) forControlEvents:UIControlEventTouchUpInside];
+    recordButton.frame = CGRectMake(20, 10, ((headerView.bounds.size.width-50) / 2), headerView.bounds.size.height - 20);
+    recordButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
+    recordButton.selected = NO;
+    
+    self.playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [playButton setTitle:@"Play" forState:UIControlStateNormal];
+    [playButton setTitle:@"Stop" forState:UIControlStateSelected];
+    [playButton addTarget:self action:@selector(play:) forControlEvents:UIControlEventTouchUpInside];
+    playButton.frame = CGRectMake(CGRectGetMaxX(recordButton.frame)+10, 10, ((headerView.bounds.size.width-50) / 2), headerView.bounds.size.height - 20);
+    playButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    
+    [headerView addSubview:recordButton];
+    [headerView addSubview:playButton];
+    self.tableView.tableHeaderView = headerView;
+    
+    
+    //
+    //  Other controls
+    //
+    soundSwitch = [[UISwitch alloc] initWithFrame:CGRectZero];
+    [soundSwitch setOn:NO animated:NO];
+    [soundSwitch addTarget:self action:@selector(toggleSound:) forControlEvents:UIControlEventValueChanged];
+    
+    
+    //
+    // motionManager
+    //
+    [self becomeFirstResponder];
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.accelerometerUpdateInterval = motionInterval;
-    self.motionManager.gyroUpdateInterval = motionInterval;
-    self.motionManager.deviceMotionUpdateInterval = motionInterval;
-    
-    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
-                                             withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
-                                                 acc = accelerometerData.acceleration;
-                                             }];
-    [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
-                                            withHandler:^(CMGyroData *gyroData, NSError *error) {
-                                                rot = gyroData.rotationRate;
-                                            }];
+    self.motionManager.deviceMotionUpdateInterval = 0.1;
     
     [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue currentQueue]
                                             withHandler:^(CMDeviceMotion *motion, NSError *error){
                                                 attitude = [motion attitude];
                                                 rotationRate = [motion rotationRate];
                                                 userAcceleration = [motion userAcceleration];
+                                                [self reloadSection: SECTION_MOTION];
                                             }];
+
+    //
+    // Create an instance of the audio controller, set it up and start it running
+    //
+    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription] inputEnabled:NO];
+    self.audioController.preferredBufferDuration = 0.005;
+    
+    
+    self.successSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Success"
+                                                                                          withExtension:@"wav"]
+                                             audioController:self.audioController
+                                                       error:NULL];
+    [self.audioController addChannels:[NSArray arrayWithObject:self.successSound]];
+    
+    self.blinkSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Blink"
+                                                                                        withExtension:@"wav"]
+                                                  audioController:self.audioController
+                                                            error:NULL];
+    
+    [self.audioController addChannels:[NSArray arrayWithObject:self.blinkSound]];
+    
+    self.shakeSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Static"
+                                                                                        withExtension:@"aif"]
+                                                audioController:self.audioController
+                                                          error:NULL];
+    
+    [self.audioController addChannels:[NSArray arrayWithObject:self.shakeSound]];
+    
+    
+
+    for(int i=0; i<N_ATTENTION_LOOPS; i++) {
+        NSString* base = [NSString stringWithFormat:@"Att%02d", i+1];
+        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
+        attentionFiles[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
+                                                            audioController:self.audioController
+                                                                      error:NULL];
+        attentionFiles[i].loop = YES;
+    }
+    
+    for(int i=0; i<N_MEDITATION_LOOPS; i++) {
+        NSString* base = [NSString stringWithFormat:@"Med%02d", i+1];
+        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
+        meditationFiles[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
+                                                      audioController:self.audioController
+                                                                error:NULL];
+        meditationFiles[i].loop = YES;
+    }
+    
+    [self.audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS]];
+    [self.audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS]];
+    
+    /*
+    self.ambientLoop1 = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"AmbientLoop"
+                                                                                          withExtension:@"wav"]
+                                                audioController:self.audioController
+                                                          error:NULL];
+    self.ambientLoop1.loop = YES;
+    
+    [self.audioController addChannels:[NSArray arrayWithObject:self.ambientLoop1]];
    
-    [self becomeFirstResponder];
-    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
-    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(sampleMotionData:) userInfo: nil repeats: YES];
     
-    self.audioController = [[AEAudioController alloc]
-                            initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription]
-                            inputEnabled:NO]; // don't forget to autorelease if you don't use ARC!
+    
+    AudioComponentDescription component  = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
+                                                                           kAudioUnitType_Effect,
+                                                                           kAudioUnitSubType_Reverb2);
     NSError *error = NULL;
-    BOOL result = [_audioController start:&error];
-    if ( !result ) {
-        NSLog(@"Error starting audioContoller: %@", [error localizedDescription]);
-    }
+    self.reverb = [[AEAudioUnitFilter alloc]
+                   initWithComponentDescription:component
+                   audioController:audioController
+                   error:&error];
     
-    NSURL *file = [[NSBundle mainBundle] URLForResource:@"AmbientLoop" withExtension:@"wav"];
-    self.ambientLoop = [AEAudioFilePlayer audioFilePlayerWithURL:file
-                                          audioController:_audioController
-                                                    error:NULL];
-    self.ambientLoop.loop = YES;
+    [self.audioController addFilter:self.reverb toChannel:self.ambientLoop1];
+     */
     
-    [_audioController addChannels:[NSArray arrayWithObjects:self.ambientLoop, nil]];
+    
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+ 
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    
+    
+    //
+    // Init vars
+    //
+    poorSignalValue = 500;
+    webSocketStatus = SOCKET_STATUS_CLOSED;
+    readings = [NSMutableArray arrayWithObjects: nil];
+    
+    //
+    // Initial kickoff
+    //
+    [self wsConnect];
+    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
 }
-
-
-
-- (BOOL)canBecomeFirstResponder {
-    return YES;
-}
-
-
-- (void) update:(NSTimer*)t {
-    if(bRecording) {
-        interval += [t timeInterval];
-    }
-    
-    NSInteger ti = (NSInteger)interval;
-    NSInteger seconds = ti % 60;
-    NSInteger minutes = (ti / 60) % 60;
-    NSInteger hours = (ti / 3600);
-    NSString* time = [NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds];
-    
-    [labelReadings setText:[NSString stringWithFormat:@"%d", [readings count]]];
-    [labelTime setText:time];
-    
-    
-    if([readings count] > 40) {
-        submitButton.alpha = 1;
-        submitButton.enabled = YES;
-        
-        resetButton.alpha = 1;
-        resetButton.enabled = YES;
-    } else {
-        submitButton.alpha = 0.4;
-        submitButton.enabled = NO;
-        
-        resetButton.alpha = 0.4;
-        resetButton.enabled = NO;
-    }
-}
-
-
-
-- (void)enableControls
-{    
-    recordButton.alpha = 1;
-    recordButton.enabled = YES;
-    
-    uiSwitch.alpha = 1;
-}
-
-- (void)disableControls
-{    
-    recordButton.alpha = 0.4;
-    recordButton.enabled = NO;
-    
-    uiSwitch.alpha = 0.4;
-    resetButton.enabled = NO;
-    
-    [uiSwitch setOn:NO];
-}
-
-
-- (void)wsConnect
-{
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults synchronize];
-    
-    [labelWebsocketStatus setText:@"Connecting..."];
-    
-    NSLog( @"host = %@", [userDefaults stringForKey:@"host"] );
-    
-    NSURL* url = [NSURL URLWithString:[userDefaults stringForKey:@"host"]];
-    _webSocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:url]];
-    _webSocket.delegate = self;
-    [_webSocket open];
-}
-
 
 - (void)didReceiveMemoryWarning
 {
@@ -171,84 +188,123 @@
     // Dispose of any resources that can be recreated.
 }
 
-
-
-- (void)processReading:(NSDictionary *)data
+- (BOOL)canBecomeFirstResponder
 {
-    if([uiSwitch isOn]) // streaming
-    {
-        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+    return YES;
+}
+
+/*
+- (CGFloat)map: (CGFloat)inVal withInputMin:(CGFloat)inMin andInputMax:(CGFloat)inMax andOutputMin:(CGFloat)outMin andOutMax:(CGFloat)outMax
+{
+    CGFloat outVal = outMin + (outMax - outMin) * (inVal - inMin) / (inMax - inMin);
+    if(outVal )
+}
+*/
+float ofMap(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {
+    
+	if (fabs(inputMin - inputMax) < FLT_EPSILON){
+		NSLog(@"ofMap(): avoiding possible divide by zero, check inputMin and inputMax: %f %f", inputMin , inputMax);
+		return outputMin;
+	} else {
+		float outVal = ((value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin);
         
-        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
-                                                           options:NSJSONWritingPrettyPrinted
-                                                             error:&error];
-        if (!jsonData) {
-            NSLog(@"Got an error: %@", error);
-        } else {
-            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            //NSLog(@"%@", jsonString);
-            NSLog(@"sending reading...");
-            if(_webSocket != nil) {
-                [_webSocket send: jsonString];
-            }
-        }
+		if( clamp ){
+			if(outputMax < outputMin){
+				if( outVal < outputMax )outVal = outputMax;
+				else if( outVal > outputMin )outVal = outputMin;
+			}else{
+				if( outVal > outputMax )outVal = outputMax;
+				else if( outVal < outputMin )outVal = outputMin;
+			}
+		}
+		return outVal;
+	}
+    
+}
+- (void) update:(NSTimer*)t
+{
+    if(recordButton.selected) {
+        interval += [t timeInterval];
     }
     
-    if(bRecording)
-    {
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
-        [readings addObject:message];
+    attentionEased += (attention-attentionEased) / 10.0;
+    meditationEased += (meditation-meditationEased) / 10.0;
+    attentionTeir = ofMap(attentionEased, 0, 100, 0, N_ATTENTION_LOOPS, true);
+    meditationTeir = ofMap(meditationEased, 0, 100, 0, N_MEDITATION_LOOPS, true);
+    
+    for(int i=0; i<N_ATTENTION_LOOPS; i++) {
+        float dist = fabs(attentionTeir - i);
+        float volume = ofMap(dist, 0, 1.0, 0.25, 0, true);
+        attentionFiles[i].volume = volume;
+        attentionFiles[i].channelIsPlaying = (volume>0);
     }
+    
+    for(int i=0; i<N_MEDITATION_LOOPS; i++) {
+        float dist = fabs(meditationTeir - i);
+        float volume = ofMap(dist, 0, 1.0, 0.25, 0, true);
+        meditationFiles[i].volume = volume;
+        meditationFiles[i].channelIsPlaying = (volume>0);
+    }
+    
+    [self reloadSection:SECTION_STATUS];
 }
 
-
-
-#pragma mark - Motion handlers
-
-- (void) sampleMotionData:(NSTimer*)t
+- (void)wsConnect
 {
-    if([uiSwitch isOn])
-    {
-        NSDictionary* data = @{@"attitude": @{@"yaw": [NSNumber numberWithDouble: attitude.yaw],
-                                              @"pitch": [NSNumber numberWithDouble: attitude.pitch],
-                                              @"roll": [NSNumber numberWithDouble: attitude.roll] },
-                               @"acceleration": @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
-                                                   @"y": [NSNumber numberWithDouble: userAcceleration.y],
-                                                   @"z": [NSNumber numberWithDouble: userAcceleration.z]}
-                               };
-        
-        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSDictionary* message = @{@"client_id": client_id, @"route": @"reading", @"reading": data, @"timestamp":timestamp};
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message
-                                                           options:NSJSONWritingPrettyPrinted
-                                                             error:&error];
-        if (!jsonData) {
-            NSLog(@"Got an error: %@", error);
-        } else {
-            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            if(_webSocket != nil)
-                [_webSocket send: jsonString];
-        }
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults synchronize];
+    
+    webSocketStatus = SOCKET_STATUS_CONNECTING;
+    
+    NSLog( @"host = %@", [userDefaults stringForKey:@"host"] );
+    
+    NSURL* url = [NSURL URLWithString:[userDefaults stringForKey:@"host"]];
+    webSocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:url]];
+    webSocket.delegate = self;
+    [webSocket open];
+}
+
+
+#pragma mark - Action Buttons
+
+- (void)record:(id)sender {
+    if(recordButton.selected) {
+        recordButton.selected = NO;
+    } else {
+        recordButton.selected = YES;
     }
 }
+
+
+- (void)play:(id)sender {
+    
+}
+
+- (void)toggleSound:(UISwitch*)sender {
+    if ( sender.isOn ) {
+        NSLog(@"Sound ON");
+        [self.audioController start:NULL];
+    } else {
+        NSLog(@"Sound OFF");
+        [self.audioController stop];
+    }
+}
+
+
+#pragma mark - Motion 
 
 - (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
 {
     if (motion == UIEventSubtypeMotionShake)
     {
+        self.shakeSound.channelIsPlaying = YES;
         // User was shaking the device.
         NSLog(@"Shake motionBegan");
         NSDictionary* reading = @{@"shake":
-                                        @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
-                                          @"y": [NSNumber numberWithDouble: userAcceleration.y],
-                                          @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
-        [self processReading:reading];
+                                      @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
+                                        @"y": [NSNumber numberWithDouble: userAcceleration.y],
+                                        @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
+        NSLog(@"Shake motionBegan");
     }
 }
 
@@ -258,161 +314,13 @@
     {
         // User was shaking the device.
         NSLog(@"Shake motionEnded");
-    }
-}
-
-
-
-
-
-#pragma mark - Button actions
-
-
-- (IBAction)submitJourney:(id)sender
-{
-    NSLog(@"submitJourney");
-
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Please enter your email address:" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
-    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-    alert.tag = 100;
-    
-    UITextField * alertTextField = [alert textFieldAtIndex:0];
-    alertTextField.keyboardType = UIKeyboardTypeEmailAddress; 
-    alertTextField.placeholder = @"you@email.com";
-    [alert show];
-    
-    [recordButton setTitle:@"Record" forState:UIControlStateNormal];
-    bRecording = NO;
-    //[uiSwitch setOn:NO animated:YES];
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
-
-    if(alertView.tag==100)
-    {
-        NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-        NSString* email = [[alertView textFieldAtIndex:0] text];
-        NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email, @"readings": readings};
         
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        
-        if(_webSocket != nil)
-            [_webSocket send: jsonString];
     }
 }
 
-- (IBAction)resetJourney:(id)sender
-{
-    NSLog(@"resetJourney");    
-    [recordButton setTitle:@"Record" forState:UIControlStateNormal];
-    bRecording = NO;
-    [readings removeAllObjects];
-    interval = 0;
-}
-
--(IBAction)toggleRecord:(id)sender
-{
-    if(bRecording) {
-        [recordButton setTitle:@"Record" forState:UIControlStateNormal];
-        bRecording = NO;
-    } else {
-       [recordButton setTitle:@"Stop" forState:UIControlStateNormal];
-        bRecording = YES;
-    }
-}
-
-- (IBAction)identify:(id)sender
-{
-    NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-    NSDictionary* data = @{@"client_id": client_id, @"route": @"identify"};
-    
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    
-    if(_webSocket != nil)
-        [_webSocket send: jsonString];
-}
 
 
-#pragma mark - SocketRocket
-
-- (void)webSocketDidOpen:(SRWebSocket *)webSocket;
-{
-    NSLog(@"Websocket Connected");
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSLog(@"%@", [NSString stringWithFormat:@"Connected to %@", [userDefaults stringForKey:@"host"]]);
-    [labelWebsocketStatus setText:@"Open"];
-    [self enableControls];
-}
-
-- (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
-{
-    NSLog(@":( Websocket Failed With Error %@", error);
-    [labelWebsocketStatus setText:@"Error"];
-     _webSocket = nil;
-    [self disableControls];
-    [NSTimer scheduledTimerWithTimeInterval: 5.0 target: self
-                                   selector: @selector(wsConnect) userInfo: nil repeats: NO];
-}
-
-- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
-{
-    NSLog(@"Received \"%@\"", message);
-    
-    NSError *jsonError = nil;
-    NSData* data = [message dataUsingEncoding:NSUTF8StringEncoding];
-    id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
-    
-    if ([jsonObject isKindOfClass:[NSArray class]]) {
-        NSArray *jsonArray = (NSArray *)jsonObject;
-        NSLog(@"jsonArray - %@",jsonArray);
-    }
-    else {
-        NSDictionary *dict = (NSDictionary *)jsonObject;
-        NSString* route = [dict valueForKey:@"route"];
-        
-        if([route isEqualToString:@"saveStatus"]) {
-            if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
-                NSLog(@"Success saving!");
-                AudioServicesPlaySystemSound (successSound);
-                
-                [readings removeAllObjects];
-                interval = 0;
-                
-            } else {
-                NSLog(@"Error saving!");
-                AudioServicesPlaySystemSound (errorSound);
-                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[dict valueForKey:@"status"]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
-                alert.tag = 101;
-                [alert show];
-
-            }
-        } else {
-            NSLog(@"UNKNOWN ROUTE!");
-        }
-    }
-}
-
-- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
-{
-    NSLog(@"WebSocket closed");
-    [labelWebsocketStatus setText:@"Closed"];
-     _webSocket = nil;
-    [self disableControls];
-    
-    [NSTimer scheduledTimerWithTimeInterval: 3.0 target: self
-                                   selector: @selector(wsConnect) userInfo: nil repeats: NO];
-}
-
-
-
-
-#pragma mark - ThinkGear 
+#pragma mark - ThinkGear
 
 //  This method gets called by the TGAccessoryManager when a ThinkGear-enabled
 //  accessory is connected.
@@ -444,225 +352,389 @@
 //  This method gets called by the TGAccessoryManager when data is received from the
 //  ThinkGear-enabled device.
 - (void)dataReceived:(NSDictionary *)data {
-
-    if([data valueForKey:@"blinkStrength"])
-        blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
     
-    if([data valueForKey:@"raw"])
-        rawValue = [[data valueForKey:@"raw"] shortValue];
-    
-    if([data valueForKey:@"heartRate"])
-        heartRate = [[data valueForKey:@"heartRate"] intValue];
-    
-    if([data valueForKey:@"poorSignal"]) {
+    if([data valueForKey:@"poorSignal"]) 
         poorSignalValue = [[data valueForKey:@"poorSignal"] intValue];
-        //NSLog(@"buffered raw count: %d", buffRawCount);
-        buffRawCount = 0;
+    
+    if([data valueForKey:@"blinkStrength"]) {
+        blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
+        //NSLog(@"blinkStrength = %d", blinkStrength);
+        //self.blinkSound.currentTime = 0;
+        //self.blinkSound.channelIsPlaying = YES;
     }
-    
-    if([data valueForKey:@"respiration"])
-        respiration = [[data valueForKey:@"respiration"] floatValue];
-    
-    if([data valueForKey:@"heartRateAverage"])
-        heartRateAverage = [[data valueForKey:@"heartRateAverage"] intValue];
-    
-    if([data valueForKey:@"heartRateAcceleration"])
-        heartRateAcceleration = [[data valueForKey:@"heartRateAcceleration"] intValue];
-    
-    if([data valueForKey:@"rawCount"])
-        rawCount = [[data valueForKey:@"rawCount"] intValue];
-    
-    
-    // check to see whether the eSense values are there. if so, we assume that
-    // all of the other data (aside from raw) is there. this is not necessarily
-    // a safe assumption.
+
     if([data valueForKey:@"eSenseAttention"]){
-        
-        eSenseValues.attention =    [[data valueForKey:@"eSenseAttention"] intValue];
-        eSenseValues.meditation =   [[data valueForKey:@"eSenseMeditation"] intValue];
-        
-        eegValues.delta =       [[data valueForKey:@"eegDelta"] intValue];
-        eegValues.theta =       [[data valueForKey:@"eegTheta"] intValue];
-        eegValues.lowAlpha =    [[data valueForKey:@"eegLowAlpha"] intValue];
-        eegValues.highAlpha =   [[data valueForKey:@"eegHighAlpha"] intValue];
-        eegValues.lowBeta =     [[data valueForKey:@"eegLowBeta"] intValue];
-        eegValues.highBeta =    [[data valueForKey:@"eegHighBeta"] intValue];
-        eegValues.lowGamma =    [[data valueForKey:@"eegLowGamma"] intValue];
-        eegValues.highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
+        attention = [[data valueForKey:@"eSenseAttention"] intValue];
+        //AudioUnitSetParameter(self.reverb.audioUnit, kReverb2Param_DryWetMix, kAudioUnitScope_Global, 0, attention, 0);
     }
     
-    //[[self tableView] performSelector:@selector(reloadData) withObject:nil afterDelay:1.0];
-    [tableView reloadData];
+    if([data valueForKey:@"eSenseMeditation"])
+        meditation = [[data valueForKey:@"eSenseMeditation"] intValue];
     
-    [self processReading: data];
+    if([data valueForKey:@"eegDelta"])
+        delta =   [[data valueForKey:@"eegDelta"] intValue];
+
+    if([data valueForKey:@"eegTheta"])
+        theta =   [[data valueForKey:@"eegTheta"] intValue];
+    
+    if([data valueForKey:@"eegLowAlpha"])
+        lowAlpha =   [[data valueForKey:@"eegLowAlpha"] intValue];
+    
+    if([data valueForKey:@"eegHighAlpha"])
+        highAlpha =   [[data valueForKey:@"eegHighAlpha"] intValue];
+    
+    if([data valueForKey:@"eegLowBeta"])
+        lowBeta =   [[data valueForKey:@"eegLowBeta"] intValue];
+    
+    if([data valueForKey:@"eegHighBeta"])
+        highBeta =   [[data valueForKey:@"eegHighBeta"] intValue];
+    
+    if([data valueForKey:@"eegLowGamma"])
+        lowGamma =   [[data valueForKey:@"eegLowGamma"] intValue];
+    
+    if([data valueForKey:@"eegHighGamma"])
+        highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
+    
+    [self reloadSection: SECTION_THINKGEAR];
 }
+
+
+#pragma mark - SocketRocket
+
+ 
+
+- (void)webSocketDidOpen:(SRWebSocket *)_webSocket;
+{
+    NSLog(@"Websocket Connected");
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSLog(@"%@", [NSString stringWithFormat:@"Connected to %@", [userDefaults stringForKey:@"host"]]);
+    webSocketStatus = SOCKET_STATUS_OPEN;
+}
+
+- (void)webSocket:(SRWebSocket *)_webSocket didFailWithError:(NSError *)error;
+{
+    NSLog(@":( Websocket Failed With Error %@", error);
+    webSocket = nil;
+    
+    webSocketStatus = SOCKET_STATUS_CONNECTING;
+    [NSTimer scheduledTimerWithTimeInterval: 3.0 target: self
+                                   selector: @selector(wsConnect) userInfo: nil repeats: NO];
+}
+
+- (void)webSocket:(SRWebSocket *)_webSocket didReceiveMessage:(id)message;
+{
+    NSLog(@"Received \"%@\"", message);
+    
+    NSError *jsonError = nil;
+    NSData* data = [message dataUsingEncoding:NSUTF8StringEncoding];
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
+    
+    if ([jsonObject isKindOfClass:[NSArray class]]) {
+        NSArray *jsonArray = (NSArray *)jsonObject;
+        NSLog(@"jsonArray - %@",jsonArray);
+    }
+    else {
+        NSDictionary *dict = (NSDictionary *)jsonObject;
+        NSString* route = [dict valueForKey:@"route"];
+    }
+}
+
+- (void)webSocket:(SRWebSocket *)_webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
+{
+    NSLog(@"WebSocket closed");
+    webSocket = nil;
+    webSocketStatus = SOCKET_STATUS_CONNECTING;
+    [NSTimer scheduledTimerWithTimeInterval: 3.0 target: self
+                                   selector: @selector(wsConnect) userInfo: nil repeats: NO];
+}
+
+
 
 
 #pragma mark - Table view data source
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    switch(section){
-        case 0:
-            return @"Status";
-        case 1:
-            return @"eSense";
-        case 2:
-            return @"EEG bands";
+
+
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 4;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    switch(section) {
+        case SECTION_CONTROLS: return @"Controls";
+        case SECTION_STATUS: return @"Status";
+        case SECTION_THINKGEAR: return @"Brain Activity";
+        case SECTION_MOTION: return @"Motion";
         default:
-            return nil;
-    }
-    
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 3;
-}
-
-// Customize the number of rows in the table view.
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    switch(section){
-        case 0: return 1;
-        case 1: return 3;
-        case 2: return 8;
-        default: return 0;
+            return [NSString stringWithFormat:@"Section %d", section];
     }
 }
 
-- (UIImage *)updateSignalStatus {
-    
-    if(poorSignalValue == 0) {
-        return [UIImage imageNamed:@"Signal_Connected"];
-    }
-    else if(poorSignalValue > 0 && poorSignalValue < 50) {
-        return [UIImage imageNamed:@"Signal_Connecting3"];
-    }
-    else if(poorSignalValue > 50 && poorSignalValue < 200) {
-        return [UIImage imageNamed:@"Signal_Connecting2"];
-    }
-    else if(poorSignalValue == 200) {
-        return [UIImage imageNamed:@"Signal_Connecting1"];
-    }
-    else {
-        return [UIImage imageNamed:@"Signal_Disconnected"];
-    }
+- (void) reloadSection:(NSUInteger)section
+{
+    [self.tableView beginUpdates];
+
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:section];
+    [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
+
+    //[self.tableView reloadData];
+    [self.tableView endUpdates];
 }
 
-// Customize the appearance of table view cells.
-- (UITableViewCell *)tableView:(UITableView *)_tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString * CellIdentifier = @"Cell";
-    
-    UITableViewCell *cell;
-    
-    cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    switch(section) {
+        case SECTION_CONTROLS: return 1;
+        case SECTION_STATUS: return 8;
+        case SECTION_THINKGEAR: return 11;
+        case SECTION_MOTION: return 9;
+        default: return 4;
+    }    
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *CellIdentifier = [NSString stringWithFormat:@"Cell_%d_%d", indexPath.section, indexPath.row];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        // cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
     }
-    NSInteger section = [indexPath indexAtPosition:0];
-    NSInteger field = [indexPath indexAtPosition:1];
     
-    
-    // Clear out leftover crud from dequeueReusableCellWithIdentifier
-    cell.imageView.image = nil;
     cell.accessoryView = nil;
-    [[cell detailTextLabel] setText: nil];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
-    
-	// Configure the cell.
-    switch(section){
-        case 0:
-            switch(field){
+    // Configure the cell...
+    switch(indexPath.section) {
+            
+        case SECTION_CONTROLS:
+            cell.accessoryView = soundSwitch;
+            cell.textLabel.text = @"Sound";
+            break;
+            
+            
+        case SECTION_STATUS:
+            switch(indexPath.row) {
                 case 0:
                     [[cell textLabel] setText:@"Signal Strength"];
-                    //[[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", poorSignalValue]];
-                    //[[cell imageView] setImage:[self updateSignalStatus]];
-                    //cell.accessoryView = [self updateSignalStatus];
-                    cell.accessoryView = [[UIImageView alloc] initWithImage:[self updateSignalStatus]];
+                    if(poorSignalValue == 0) {
+                        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Connected"]];
+                    }
+                    else if(poorSignalValue > 0 && poorSignalValue < 50) {
+                        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Connecting3"]];
+                    }
+                    else if(poorSignalValue > 50 && poorSignalValue < 200) {
+                        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Connecting2"]];
+                    }
+                    else if(poorSignalValue == 200) {
+                        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Connecting1"]];
+                    }
+                    else {
+                        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Disconnected"]];
+                    }
                     break;
-                default:
+
+                case 1:
+                    [[cell textLabel] setText:@"Websocket"];
+                    switch(webSocketStatus) {
+                        case SOCKET_STATUS_CLOSED:
+                            [[cell detailTextLabel] setText:@"Closed"];
+                            break;
+                        case SOCKET_STATUS_CONNECTING:
+                            [[cell detailTextLabel] setText:@"Connecting"];
+                            break;
+                        case SOCKET_STATUS_OPEN:
+                            [[cell detailTextLabel] setText:@"Open"];
+                            break;
+                    }
+                    break;
+                
+                case 2:
+                    [[cell textLabel] setText:@"Record Time"];
+                    
+                    NSInteger ti = (NSInteger)interval;
+                    NSInteger seconds = ti % 60;
+                    NSInteger minutes = (ti / 60) % 60;
+                    NSInteger hours = (ti / 3600);
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds]];
+                    break;
+                case 3:
+                    [[cell textLabel] setText:@"Readings"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", [readings count]]];
+                    break;
+                case 4:
+                    [[cell textLabel] setText:@"Meditation Eased"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", meditationEased]];
+                    break;
+                case 5:
+                    [[cell textLabel] setText:@"Attention Eased"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attentionEased]];
+                    break;
+                case 6:
+                    [[cell textLabel] setText:@"Meditation Teir"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", meditationTeir]];
+                    break;
+                case 7:
+                    [[cell textLabel] setText:@"Attention Teir"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attentionTeir]];
                     break;
             }
-            
             break;
-        case 1:
-            switch(field){
+
+        case SECTION_THINKGEAR:
+            switch (indexPath.row) {
                 case 0:
                     [[cell textLabel] setText:@"Attention"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eSenseValues.attention]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", attention]];
                     break;
                 case 1:
                     [[cell textLabel] setText:@"Meditation"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eSenseValues.meditation]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", meditation]];
                     break;
                 case 2:
-                    [[cell textLabel] setText:@"Blink strength"];
+                    [[cell textLabel] setText:@"Blink Strength"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", blinkStrength]];
                     break;
-                /*
                 case 3:
-                    [[cell textLabel] setText:@"Heart rate"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", heartRate]];
-                    break;
-                case 4:
-                    [[cell textLabel] setText:@"Respiration"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%f", respiration]];
-                    break;
-                case 5:
-                    [[cell textLabel] setText:@"Heart Rate Average"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", heartRateAverage]];
-                    break;
-                case 6:
-                    [[cell textLabel] setText:@"Heart Rate Acceleration"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", heartRateAcceleration]];
-                    break;
-                */
-                default:
-                    break;
-            }
-            
-            break;
-        case 2:
-            switch(field){
-                case 0:
                     [[cell textLabel] setText:@"Delta"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.delta]];
-                    break;
-                case 1:
-                    [[cell textLabel] setText:@"Theta"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.theta]];
-                    break;
-                case 2:
-                    [[cell textLabel] setText:@"Low alpha"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.lowAlpha]];
-                    break;
-                case 3:
-                    [[cell textLabel] setText:@"High alpha"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.highAlpha]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", delta]];
                     break;
                 case 4:
-                    [[cell textLabel] setText:@"Low beta"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.lowBeta]];
+                    [[cell textLabel] setText:@"Theta"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", theta]];
                     break;
                 case 5:
-                    [[cell textLabel] setText:@"High beta"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.highBeta]];
+                    [[cell textLabel] setText:@"Low Alpha"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", lowAlpha]];
                     break;
                 case 6:
-                    [[cell textLabel] setText:@"Low gamma"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.lowGamma]];
+                    [[cell textLabel] setText:@"High Alpha"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", highAlpha]];
                     break;
                 case 7:
-                    [[cell textLabel] setText:@"High gamma"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", eegValues.highGamma]];
+                    [[cell textLabel] setText:@"Low Beta"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", lowBeta]];
+                    break;
+                case 8:
+                    [[cell textLabel] setText:@"High Beta"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", highBeta]];
+                    break;
+                case 9:
+                    [[cell textLabel] setText:@"Low Gamma"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", lowGamma]];
+                    break;
+                case 10:
+                    [[cell textLabel] setText:@"High Gamma"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", highGamma]];
+                    break;
+            }
+            break;
+            
+        case SECTION_MOTION:
+            switch (indexPath.row) {
+                case 0:
+                    [[cell textLabel] setText:@"Yaw"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.yaw]];
+                    break;
+                case 1:
+                    [[cell textLabel] setText:@"Pitch"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.pitch]];
+                    break;
+                case 2:
+                    [[cell textLabel] setText:@"Roll"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.roll]];
+                    break;
+                case 3:
+                    [[cell textLabel] setText:@"X Rotation"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.x]];
+                    break;
+                case 4:
+                    [[cell textLabel] setText:@"Y Rotation"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.y]];
+                    break;
+                case 5:
+                    [[cell textLabel] setText:@"Z Rotation"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.z]];
+                    break;
+                case 6:
+                    [[cell textLabel] setText:@"X Acceleration"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.x]];
+                    break;
+                case 7:
+                    [[cell textLabel] setText:@"Y Acceleration"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.y]];
+                    break;
+                case 8:
+                    [[cell textLabel] setText:@"Z Acceleration"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.z]];
                     break;
                 default:
                     break;
             }
-            
             break;
         default:
+            [[cell textLabel] setText:CellIdentifier];
             break;
     }
+    
     return cell;
 }
+
+/*
+// Override to support conditional editing of the table view.
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Return NO if you do not want the specified item to be editable.
+    return YES;
+}
+*/
+
+/*
+// Override to support editing the table view.
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // Delete the row from the data source
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    }   
+    else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+    }   
+}
+*/
+
+/*
+// Override to support rearranging the table view.
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+{
+}
+*/
+
+/*
+// Override to support conditional rearranging of the table view.
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Return NO if you do not want the item to be re-orderable.
+    return YES;
+}
+*/
+
+#pragma mark - Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Navigation logic may go here. Create and push another view controller.
+    /*
+     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
+     // ...
+     // Pass the selected object to the new view controller.
+     [self.navigationController pushViewController:detailViewController animated:YES];
+     */
+}
+
 @end

@@ -2,29 +2,39 @@
 //  ViewController.h
 //  BrainProxy
 //
-//  Created by Jeffrey Crouse on 8/14/13.
+//  Created by Jeffrey Crouse on 8/21/13.
 //  Copyright (c) 2013 Jeffrey Crouse. All rights reserved.
 //
 
-#import "TGAccessoryManager.h"
-#import "TGAccessoryDelegate.h"
-#import <ExternalAccessory/ExternalAccessory.h>
-#import "SRWebSocket.h"
 #import <UIKit/UIKit.h>
-#import <AudioToolbox/AudioToolbox.h>
 #import <CoreMotion/CoreMotion.h>
-#import <TheAmazingAudioEngine.h>
+#import "SRWebSocket.h"
+#import "TGAccessoryDelegate.h"
+#import "TGAccessoryManager.h"
+#import "TheAmazingAudioEngine.h"
+
+#define SOCKET_STATUS_CLOSED 1
+#define SOCKET_STATUS_CONNECTING 2
+#define SOCKET_STATUS_OPEN 3
+
+#define SECTION_CONTROLS 0
+#define SECTION_STATUS 1
+#define SECTION_THINKGEAR 2
+#define SECTION_MOTION 3
+
+#define N_ATTENTION_LOOPS 10
+#define N_MEDITATION_LOOPS 6
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
-// the eSense values
-typedef struct {
+
+@interface ViewController : UITableViewController <SRWebSocketDelegate,TGAccessoryDelegate> {
+    
+    // ThinkGear stuff
+    int blinkStrength;
+    int poorSignalValue;
     int attention;
     int meditation;
-} ESenseValues;
-
-// the EEG power bands
-typedef struct {
     int delta;
     int theta;
     int lowAlpha;
@@ -33,43 +43,25 @@ typedef struct {
     int highBeta;
     int lowGamma;
     int highGamma;
-} EEGValues;
-
-@interface ViewController : UIViewController <TGAccessoryDelegate, SRWebSocketDelegate, UITableViewDataSource> {
-    short rawValue;
-    int rawCount;
-    int buffRawCount;
-    int blinkStrength;
-    int poorSignalValue;
-    int heartRate;
-    float respiration;
-    int heartRateAverage;
-    int heartRateAcceleration;
     
-    ESenseValues eSenseValues;
-    EEGValues eegValues;
+    float attentionEased;
+    float meditationEased;
+    float attentionTeir;
+    float meditationTeir;
     
-    SRWebSocket *_webSocket;
+    // Other stuff
     NSMutableArray* readings;
-    BOOL bRecording;
     NSTimeInterval interval;
-    SystemSoundID successSound;
-    SystemSoundID errorSound;
-
+    int webSocketStatus;
+    SRWebSocket *webSocket;
     CMAttitude* attitude;
     CMRotationRate rotationRate;
-    CMAcceleration acc;
     CMAcceleration userAcceleration;
-    CMRotationRate rot;
+    //NSArray* medLoops;
+    //NSArray* attLoops;
+    AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
+    AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
 }
-
-- (void) update:(NSTimer*)t;
-- (void) wsConnect;
-
-// TGAccessoryDelegate protocol methods
-- (void)accessoryDidConnect:(EAAccessory *)accessory;
-- (void)accessoryDidDisconnect;
-- (void)dataReceived:(NSDictionary *)data;
 
 // SocketRocket
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
@@ -77,20 +69,16 @@ typedef struct {
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 
-- (IBAction)submitJourney:(id)sender;
-- (IBAction)resetJourney:(id)sender;
-- (IBAction)toggleRecord:(id)sender;
-- (IBAction)identify:(id)sender;
-
-@property (nonatomic, strong) AEAudioController *audioController;
-@property (nonatomic, strong) AEAudioFilePlayer *ambientLoop;
+@property (retain, nonatomic) AEAudioController *audioController;
 @property (strong, nonatomic) CMMotionManager *motionManager;
-@property (nonatomic, retain) IBOutlet UILabel *labelReadings;
-@property (nonatomic, retain) IBOutlet UILabel *labelTime;
-@property (nonatomic, retain) IBOutlet UILabel *labelWebsocketStatus;
-@property (nonatomic, retain) IBOutlet UIButton *submitButton;
-@property (nonatomic, retain) IBOutlet UIButton *resetButton;
-@property (nonatomic, retain) IBOutlet UIButton *recordButton;
-@property (nonatomic, retain) IBOutlet UISwitch *uiSwitch;
-@property (nonatomic, retain) IBOutlet UITableView *tableView;
+@property (nonatomic, retain) UIButton *recordButton;
+@property (nonatomic, retain) UIButton *playButton;
+@property (nonatomic, retain) UISwitch *soundSwitch;
+
+@property (nonatomic, retain) AEAudioFilePlayer *successSound;
+@property (nonatomic, retain) AEAudioFilePlayer *errorSound;
+@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
+@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
+@property (nonatomic, retain) AEAudioFilePlayer *ambientLoop1;
+@property (nonatomic, retain) AEAudioUnitFilter *reverb;
 @end
