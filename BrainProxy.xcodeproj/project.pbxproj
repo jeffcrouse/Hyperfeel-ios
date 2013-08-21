@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1F64D96317BEC23C00677F84 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F64D96217BEC23B00677F84 /* CoreMotion.framework */; };
+		1FA2062D17C4214900DF4DEF /* libTheAmazingAudioEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA2062C17C4213400DF4DEF /* libTheAmazingAudioEngine.a */; };
+		1FA2063217C42C8600DF4DEF /* AmbientLoop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FA2063117C42C8600DF4DEF /* AmbientLoop.wav */; };
 		1FCE191117BBD5E200F3D256 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191017BBD5E200F3D256 /* UIKit.framework */; };
 		1FCE191317BBD5E200F3D256 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191217BBD5E200F3D256 /* Foundation.framework */; };
 		1FCE191517BBD5E200F3D256 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCE191417BBD5E200F3D256 /* CoreGraphics.framework */; };
@@ -43,8 +45,27 @@
 		1FE7107617C112E100E67ED9 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FE7107417C112E100E67ED9 /* Icon@2x.png */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		1FA2062B17C4213400DF4DEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1FA2062717C4213300DF4DEF /* TheAmazingAudioEngine.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4C215CEC1523A7D500D36CAD;
+			remoteInfo = TheAmazingAudioEngine;
+		};
+		1FA2062E17C4215E00DF4DEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1FA2062717C4213300DF4DEF /* TheAmazingAudioEngine.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C215CEB1523A7D500D36CAD;
+			remoteInfo = TheAmazingAudioEngine;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1F64D96217BEC23B00677F84 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
+		1FA2062717C4213300DF4DEF /* TheAmazingAudioEngine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TheAmazingAudioEngine.xcodeproj; path = TheAmazingAudioEngine/TheAmazingAudioEngine.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1FA2063117C42C8600DF4DEF /* AmbientLoop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = AmbientLoop.wav; sourceTree = "<group>"; };
 		1FCE190D17BBD5E200F3D256 /* BrainProxy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainProxy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FCE191017BBD5E200F3D256 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1FCE191217BBD5E200F3D256 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -97,6 +118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FA2062D17C4214900DF4DEF /* libTheAmazingAudioEngine.a in Frameworks */,
 				1F64D96317BEC23C00677F84 /* CoreMotion.framework in Frameworks */,
 				1FD28B9517BC434300A0169D /* AudioToolbox.framework in Frameworks */,
 				1FCE195017BBE13C00F3D256 /* ExternalAccessory.framework in Frameworks */,
@@ -115,6 +137,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1FA2062617C4212500DF4DEF /* AmazingAudioEngine */ = {
+			isa = PBXGroup;
+			children = (
+				1FA2062717C4213300DF4DEF /* TheAmazingAudioEngine.xcodeproj */,
+			);
+			name = AmazingAudioEngine;
+			sourceTree = "<group>";
+		};
+		1FA2062817C4213300DF4DEF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1FA2062C17C4213400DF4DEF /* libTheAmazingAudioEngine.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		1FCE190417BBD5E200F3D256 = {
 			isa = PBXGroup;
 			children = (
@@ -160,6 +198,7 @@
 				1FCE195117BBF29E00F3D256 /* BrainView.h */,
 				1FCE195217BBF29E00F3D256 /* BrainView.m */,
 				1FCE192B17BBD5E200F3D256 /* ViewController.xib */,
+				1FA2062617C4212500DF4DEF /* AmazingAudioEngine */,
 				1FCE193517BBE01300F3D256 /* SocketRocket */,
 				1FCE193D17BBE01300F3D256 /* ThinkGear */,
 				1FCE191717BBD5E200F3D256 /* Supporting Files */,
@@ -173,6 +212,7 @@
 				1FE7107317C112E100E67ED9 /* Icon.png */,
 				1FE7107417C112E100E67ED9 /* Icon@2x.png */,
 				1FD28B9E17BC4CA400A0169D /* error.wav */,
+				1FA2063117C42C8600DF4DEF /* AmbientLoop.wav */,
 				1FD28B9217BC3E2300A0169D /* success.wav */,
 				1FD6C12117BC2584002864F7 /* Signal_Connected.png */,
 				1FD6C12217BC2584002864F7 /* Signal_Connecting1.png */,
@@ -229,6 +269,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				1FA2062F17C4215E00DF4DEF /* PBXTargetDependency */,
 			);
 			name = BrainProxy;
 			productName = BrainProxy;
@@ -254,12 +295,28 @@
 			mainGroup = 1FCE190417BBD5E200F3D256;
 			productRefGroup = 1FCE190E17BBD5E200F3D256 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1FA2062817C4213300DF4DEF /* Products */;
+					ProjectRef = 1FA2062717C4213300DF4DEF /* TheAmazingAudioEngine.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				1FCE190C17BBD5E200F3D256 /* BrainProxy */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1FA2062C17C4213400DF4DEF /* libTheAmazingAudioEngine.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTheAmazingAudioEngine.a;
+			remoteRef = 1FA2062B17C4213400DF4DEF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1FCE190B17BBD5E200F3D256 /* Resources */ = {
@@ -281,6 +338,7 @@
 				1FD28B9F17BC4CA400A0169D /* error.wav in Resources */,
 				1FE7107517C112E100E67ED9 /* Icon.png in Resources */,
 				1FE7107617C112E100E67ED9 /* Icon@2x.png in Resources */,
+				1FA2063217C42C8600DF4DEF /* AmbientLoop.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +360,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1FA2062F17C4215E00DF4DEF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = TheAmazingAudioEngine;
+			targetProxy = 1FA2062E17C4215E00DF4DEF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		1FCE191917BBD5E200F3D256 /* InfoPlist.strings */ = {
@@ -384,6 +450,7 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"";
 				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -399,6 +466,7 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"";
 				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

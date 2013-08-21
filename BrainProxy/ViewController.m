@@ -71,6 +71,23 @@
     [self becomeFirstResponder];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(sampleMotionData:) userInfo: nil repeats: YES];
+    
+    self.audioController = [[AEAudioController alloc]
+                            initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription]
+                            inputEnabled:NO]; // don't forget to autorelease if you don't use ARC!
+    NSError *error = NULL;
+    BOOL result = [_audioController start:&error];
+    if ( !result ) {
+        NSLog(@"Error starting audioContoller: %@", [error localizedDescription]);
+    }
+    
+    NSURL *file = [[NSBundle mainBundle] URLForResource:@"AmbientLoop" withExtension:@"wav"];
+    self.ambientLoop = [AEAudioFilePlayer audioFilePlayerWithURL:file
+                                          audioController:_audioController
+                                                    error:NULL];
+    self.ambientLoop.loop = YES;
+    
+    [_audioController addChannels:[NSArray arrayWithObjects:self.ambientLoop, nil]];
 }
 
 

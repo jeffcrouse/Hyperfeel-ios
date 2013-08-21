@@ -13,7 +13,7 @@
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <CoreMotion/CoreMotion.h>
-
+#import <TheAmazingAudioEngine.h>
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
@@ -82,6 +82,8 @@ typedef struct {
 - (IBAction)toggleRecord:(id)sender;
 - (IBAction)identify:(id)sender;
 
+@property (nonatomic, strong) AEAudioController *audioController;
+@property (nonatomic, strong) AEAudioFilePlayer *ambientLoop;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (nonatomic, retain) IBOutlet UILabel *labelReadings;
 @property (nonatomic, retain) IBOutlet UILabel *labelTime;
