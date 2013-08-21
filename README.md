@@ -9,3 +9,4 @@ BrainProxy
 * [Diagnosing crashes](http://www.raywenderlich.com/10209/my-app-crashed-now-what-part-1)
 * [Getting started with AmazingAudioEngine](http://theamazingaudioengine.com/doc/_getting-_started.html)
 * [SocketRocket](https://github.com/square/SocketRocket)
+* [Batch adding compiler flags (like -fno-objc-arc) to source files in an Xcode project.](http://blog.evanmulawski.com/?p=36)

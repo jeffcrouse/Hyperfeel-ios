@@ -35,7 +35,16 @@
 		1F3B7C4717C53B61000E2E69 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */; };
 		1F3B7C4917C53B65000E2E69 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */; };
 		1F3B7C4B17C53B8B000E2E69 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */; };
-		1F3B7C5817C53DDF000E2E69 /* libTheAmazingAudioEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C5317C53DBE000E2E69 /* libTheAmazingAudioEngine.a */; };
+		1F98024017C573F1004BDB96 /* libTheAmazingAudioEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F98023D17C573E5004BDB96 /* libTheAmazingAudioEngine.a */; };
+		1F98025417C575F0004BDB96 /* AEExpanderFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024317C575F0004BDB96 /* AEExpanderFilter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025517C575F0004BDB96 /* AELimiter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024517C575F0004BDB96 /* AELimiter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025617C575F0004BDB96 /* AELimiterFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024717C575F0004BDB96 /* AELimiterFilter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025717C575F0004BDB96 /* AEMixerBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024917C575F0004BDB96 /* AEMixerBuffer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025817C575F0004BDB96 /* AEPlaythroughChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024B17C575F0004BDB96 /* AEPlaythroughChannel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025917C575F0004BDB96 /* AERecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98024D17C575F0004BDB96 /* AERecorder.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025A17C575F0004BDB96 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 1F98024F17C575F0004BDB96 /* README.markdown */; };
+		1F98025B17C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 1F98025017C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98025C17C575F0004BDB96 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 1F98025217C575F0004BDB96 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1FA4D93D17C5442000D5A01F /* Error.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93817C543A700D5A01F /* Error.wav */; };
 		1FA4D93E17C5442100D5A01F /* Static.aif in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93917C543A700D5A01F /* Static.aif */; };
 		1FA4D93F17C5442200D5A01F /* Success.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93A17C543A700D5A01F /* Success.wav */; };
@@ -59,16 +68,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1F3B7C5217C53DBE000E2E69 /* PBXContainerItemProxy */ = {
+		1F98023C17C573E5004BDB96 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1F3B7C4E17C53DBE000E2E69 /* TheAmazingAudioEngine.xcodeproj */;
+			containerPortal = 1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4C215CEC1523A7D500D36CAD;
 			remoteInfo = TheAmazingAudioEngine;
 		};
-		1F3B7C5617C53DDB000E2E69 /* PBXContainerItemProxy */ = {
+		1F98023E17C573EE004BDB96 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1F3B7C4E17C53DBE000E2E69 /* TheAmazingAudioEngine.xcodeproj */;
+			containerPortal = 1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 4C215CEB1523A7D500D36CAD;
 			remoteInfo = TheAmazingAudioEngine;
@@ -115,7 +124,24 @@
 		1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
-		1F3B7C4E17C53DBE000E2E69 /* TheAmazingAudioEngine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TheAmazingAudioEngine.xcodeproj; path = TheAmazingAudioEngine/TheAmazingAudioEngine.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TheAmazingAudioEngine.xcodeproj; path = TheAmazingAudioEngine/TheAmazingAudioEngine.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1F98024217C575F0004BDB96 /* AEExpanderFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEExpanderFilter.h; sourceTree = "<group>"; };
+		1F98024317C575F0004BDB96 /* AEExpanderFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AEExpanderFilter.m; sourceTree = "<group>"; };
+		1F98024417C575F0004BDB96 /* AELimiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AELimiter.h; sourceTree = "<group>"; };
+		1F98024517C575F0004BDB96 /* AELimiter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AELimiter.m; sourceTree = "<group>"; };
+		1F98024617C575F0004BDB96 /* AELimiterFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AELimiterFilter.h; sourceTree = "<group>"; };
+		1F98024717C575F0004BDB96 /* AELimiterFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AELimiterFilter.m; sourceTree = "<group>"; };
+		1F98024817C575F0004BDB96 /* AEMixerBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEMixerBuffer.h; sourceTree = "<group>"; };
+		1F98024917C575F0004BDB96 /* AEMixerBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AEMixerBuffer.m; sourceTree = "<group>"; };
+		1F98024A17C575F0004BDB96 /* AEPlaythroughChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEPlaythroughChannel.h; sourceTree = "<group>"; };
+		1F98024B17C575F0004BDB96 /* AEPlaythroughChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AEPlaythroughChannel.m; sourceTree = "<group>"; };
+		1F98024C17C575F0004BDB96 /* AERecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AERecorder.h; sourceTree = "<group>"; };
+		1F98024D17C575F0004BDB96 /* AERecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AERecorder.m; sourceTree = "<group>"; };
+		1F98024F17C575F0004BDB96 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
+		1F98025017C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
+		1F98025117C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
+		1F98025217C575F0004BDB96 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
+		1F98025317C575F0004BDB96 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		1FA4D93817C543A700D5A01F /* Error.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Error.wav; path = Sounds/Error.wav; sourceTree = "<group>"; };
 		1FA4D93917C543A700D5A01F /* Static.aif */ = {isa = PBXFileReference; lastKnownFileType = file; name = Static.aif; path = Sounds/Static.aif; sourceTree = "<group>"; };
 		1FA4D93A17C543A700D5A01F /* Success.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Success.wav; path = Sounds/Success.wav; sourceTree = "<group>"; };
@@ -143,7 +169,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F3B7C5817C53DDF000E2E69 /* libTheAmazingAudioEngine.a in Frameworks */,
+				1F98024017C573F1004BDB96 /* libTheAmazingAudioEngine.a in Frameworks */,
 				1F3B7C4B17C53B8B000E2E69 /* Accelerate.framework in Frameworks */,
 				1F3B7C4917C53B65000E2E69 /* AudioToolbox.framework in Frameworks */,
 				1F3B7C4717C53B61000E2E69 /* QuartzCore.framework in Frameworks */,
@@ -204,7 +230,8 @@
 				1F3B7BFB17C5193A000E2E69 /* AppDelegate.m */,
 				1F3B7C0817C5197B000E2E69 /* ViewController.h */,
 				1F3B7C0917C5197B000E2E69 /* ViewController.m */,
-				1F3B7C4D17C53DB3000E2E69 /* TheAmazingAudioEngine */,
+				1F98024117C575F0004BDB96 /* Modules */,
+				1F98023717C573D9004BDB96 /* TheAMazingAudioEngine */,
 				1F3B7C3F17C5395E000E2E69 /* ThinkGear */,
 				1F3B7C2C17C531B5000E2E69 /* SocketRocket */,
 				1F3B7BF217C5193A000E2E69 /* Supporting Files */,
@@ -276,20 +303,53 @@
 			path = ThinkGear;
 			sourceTree = "<group>";
 		};
-		1F3B7C4D17C53DB3000E2E69 /* TheAmazingAudioEngine */ = {
+		1F98023717C573D9004BDB96 /* TheAMazingAudioEngine */ = {
 			isa = PBXGroup;
 			children = (
-				1F3B7C4E17C53DBE000E2E69 /* TheAmazingAudioEngine.xcodeproj */,
+				1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */,
 			);
-			name = TheAmazingAudioEngine;
+			name = TheAMazingAudioEngine;
 			sourceTree = "<group>";
 		};
-		1F3B7C4F17C53DBE000E2E69 /* Products */ = {
+		1F98023917C573E5004BDB96 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1F3B7C5317C53DBE000E2E69 /* libTheAmazingAudioEngine.a */,
+				1F98023D17C573E5004BDB96 /* libTheAmazingAudioEngine.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1F98024117C575F0004BDB96 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				1F98024217C575F0004BDB96 /* AEExpanderFilter.h */,
+				1F98024317C575F0004BDB96 /* AEExpanderFilter.m */,
+				1F98024417C575F0004BDB96 /* AELimiter.h */,
+				1F98024517C575F0004BDB96 /* AELimiter.m */,
+				1F98024617C575F0004BDB96 /* AELimiterFilter.h */,
+				1F98024717C575F0004BDB96 /* AELimiterFilter.m */,
+				1F98024817C575F0004BDB96 /* AEMixerBuffer.h */,
+				1F98024917C575F0004BDB96 /* AEMixerBuffer.m */,
+				1F98024A17C575F0004BDB96 /* AEPlaythroughChannel.h */,
+				1F98024B17C575F0004BDB96 /* AEPlaythroughChannel.m */,
+				1F98024C17C575F0004BDB96 /* AERecorder.h */,
+				1F98024D17C575F0004BDB96 /* AERecorder.m */,
+				1F98024E17C575F0004BDB96 /* TPCircularBuffer */,
+			);
+			name = Modules;
+			path = TheAmazingAudioEngine/Modules;
+			sourceTree = SOURCE_ROOT;
+		};
+		1F98024E17C575F0004BDB96 /* TPCircularBuffer */ = {
+			isa = PBXGroup;
+			children = (
+				1F98024F17C575F0004BDB96 /* README.markdown */,
+				1F98025017C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c */,
+				1F98025117C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.h */,
+				1F98025217C575F0004BDB96 /* TPCircularBuffer.c */,
+				1F98025317C575F0004BDB96 /* TPCircularBuffer.h */,
+			);
+			path = TPCircularBuffer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -306,7 +366,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				1F3B7C5717C53DDB000E2E69 /* PBXTargetDependency */,
+				1F98023F17C573EE004BDB96 /* PBXTargetDependency */,
 			);
 			name = BrainProxy;
 			productName = BrainProxy;
@@ -334,8 +394,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 1F3B7C4F17C53DBE000E2E69 /* Products */;
-					ProjectRef = 1F3B7C4E17C53DBE000E2E69 /* TheAmazingAudioEngine.xcodeproj */;
+					ProductGroup = 1F98023917C573E5004BDB96 /* Products */;
+					ProjectRef = 1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -346,11 +406,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		1F3B7C5317C53DBE000E2E69 /* libTheAmazingAudioEngine.a */ = {
+		1F98023D17C573E5004BDB96 /* libTheAmazingAudioEngine.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libTheAmazingAudioEngine.a;
-			remoteRef = 1F3B7C5217C53DBE000E2E69 /* PBXContainerItemProxy */;
+			remoteRef = 1F98023C17C573E5004BDB96 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -390,6 +450,7 @@
 				1FA4D95F17C55AD500D5A01F /* Med04.wav in Resources */,
 				1FA4D96017C55AD500D5A01F /* Med05.wav in Resources */,
 				1FA4D96117C55AD500D5A01F /* Med06.wav in Resources */,
+				1F98025A17C575F0004BDB96 /* README.markdown in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,16 +467,24 @@
 				1F3B7C3417C531B5000E2E69 /* base64.c in Sources */,
 				1F3B7C3517C531B5000E2E69 /* NSData+SRB64Additions.m in Sources */,
 				1F3B7C3617C531B5000E2E69 /* SRWebSocket.m in Sources */,
+				1F98025417C575F0004BDB96 /* AEExpanderFilter.m in Sources */,
+				1F98025517C575F0004BDB96 /* AELimiter.m in Sources */,
+				1F98025617C575F0004BDB96 /* AELimiterFilter.m in Sources */,
+				1F98025717C575F0004BDB96 /* AEMixerBuffer.m in Sources */,
+				1F98025817C575F0004BDB96 /* AEPlaythroughChannel.m in Sources */,
+				1F98025917C575F0004BDB96 /* AERecorder.m in Sources */,
+				1F98025B17C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c in Sources */,
+				1F98025C17C575F0004BDB96 /* TPCircularBuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1F3B7C5717C53DDB000E2E69 /* PBXTargetDependency */ = {
+		1F98023F17C573EE004BDB96 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = TheAmazingAudioEngine;
-			targetProxy = 1F3B7C5617C53DDB000E2E69 /* PBXContainerItemProxy */;
+			targetProxy = 1F98023E17C573EE004BDB96 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -492,7 +561,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"",
+					"\"$(SRCROOT)/TheAmazingAudioEngine/Modules\"",
+				);
 				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -508,7 +580,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"",
+					"\"$(SRCROOT)/TheAmazingAudioEngine/Modules\"",
+				);
 				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

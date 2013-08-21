@@ -16,11 +16,13 @@
 
 @implementation ViewController
 
-@synthesize recordButton, playButton;
+@synthesize recordButton, submitButton, resetButton;
 @synthesize soundSwitch;
 @synthesize motionManager;
 @synthesize audioController;
-@synthesize successSound, errorSound, blinkSound, shakeSound, ambientLoop1;
+@synthesize successSound, errorSound, blinkSound, shakeSound;
+@synthesize recorder;
+
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -43,23 +45,41 @@
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 100)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     
+    float x = 20;
+    float y = 10;
+    float width = ((headerView.bounds.size.width-50) / 2);
+    float height = headerView.bounds.size.height - 20;
+    
     self.recordButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [recordButton setTitle:@"Record" forState:UIControlStateNormal];
     [recordButton setTitle:@"Stop" forState:UIControlStateSelected];
     [recordButton addTarget:self action:@selector(record:) forControlEvents:UIControlEventTouchUpInside];
-    recordButton.frame = CGRectMake(20, 10, ((headerView.bounds.size.width-50) / 2), headerView.bounds.size.height - 20);
+    recordButton.frame = CGRectMake(x, y, width, height);
     recordButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
     recordButton.selected = NO;
     
-    self.playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [playButton setTitle:@"Play" forState:UIControlStateNormal];
-    [playButton setTitle:@"Stop" forState:UIControlStateSelected];
-    [playButton addTarget:self action:@selector(play:) forControlEvents:UIControlEventTouchUpInside];
-    playButton.frame = CGRectMake(CGRectGetMaxX(recordButton.frame)+10, 10, ((headerView.bounds.size.width-50) / 2), headerView.bounds.size.height - 20);
-    playButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    x = CGRectGetMaxX(recordButton.frame)+10;
+    height = (headerView.bounds.size.height - 20) * 0.6;
+    
+    self.submitButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [submitButton setTitle:@"Submit" forState:UIControlStateNormal];
+    [submitButton addTarget:self action:@selector(submitJourney:) forControlEvents:UIControlEventTouchUpInside];
+    submitButton.frame = CGRectMake(x, y, width, height);
+    submitButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    
+    y += (headerView.bounds.size.height - 20) * 0.7;
+    height = (headerView.bounds.size.height - 20) * 0.3;
+    
+    self.resetButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [resetButton setTitle:@"Reset" forState:UIControlStateNormal];
+    [resetButton addTarget:self action:@selector(resetJourney:) forControlEvents:UIControlEventTouchUpInside];
+    resetButton.frame = CGRectMake(x, y, width, height);
+    resetButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    
     
     [headerView addSubview:recordButton];
-    [headerView addSubview:playButton];
+    [headerView addSubview:submitButton];
+    [headerView addSubview:resetButton];
     self.tableView.tableHeaderView = headerView;
     
     
@@ -97,20 +117,23 @@
                                                                                           withExtension:@"wav"]
                                              audioController:self.audioController
                                                        error:NULL];
+    self.successSound.volume = 0.5;
+    self.successSound.channelIsPlaying = NO;
     [self.audioController addChannels:[NSArray arrayWithObject:self.successSound]];
     
     self.blinkSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Blink"
                                                                                         withExtension:@"wav"]
                                                   audioController:self.audioController
                                                             error:NULL];
-    
+    self.blinkSound.volume = 0.5;
+    self.blinkSound.channelIsPlaying = NO;
     [self.audioController addChannels:[NSArray arrayWithObject:self.blinkSound]];
     
     self.shakeSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Static"
                                                                                         withExtension:@"aif"]
                                                 audioController:self.audioController
                                                           error:NULL];
-    
+    self.shakeSound.channelIsPlaying = NO;
     [self.audioController addChannels:[NSArray arrayWithObject:self.shakeSound]];
     
     
@@ -122,7 +145,9 @@
                                                             audioController:self.audioController
                                                                       error:NULL];
         attentionFiles[i].loop = YES;
+        attentionFiles[i].channelIsPlaying = NO;
     }
+    
     
     for(int i=0; i<N_MEDITATION_LOOPS; i++) {
         NSString* base = [NSString stringWithFormat:@"Med%02d", i+1];
@@ -131,21 +156,21 @@
                                                       audioController:self.audioController
                                                                 error:NULL];
         meditationFiles[i].loop = YES;
+        attentionFiles[i].channelIsPlaying = NO;
     }
     
-    [self.audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS]];
-    [self.audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS]];
+    brainSoundGroup = [audioController createChannelGroup];
+    
+    [audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS] toChannelGroup:brainSoundGroup];
+    [audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS] toChannelGroup:brainSoundGroup];
+    [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+    [self.audioController start:NULL];
+    
+    //[self.audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS]];
+    //[self.audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS]];
+    
     
     /*
-    self.ambientLoop1 = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"AmbientLoop"
-                                                                                          withExtension:@"wav"]
-                                                audioController:self.audioController
-                                                          error:NULL];
-    self.ambientLoop1.loop = YES;
-    
-    [self.audioController addChannels:[NSArray arrayWithObject:self.ambientLoop1]];
-   
-    
     
     AudioComponentDescription component  = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
                                                                            kAudioUnitType_Effect,
@@ -159,12 +184,6 @@
     [self.audioController addFilter:self.reverb toChannel:self.ambientLoop1];
      */
     
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
     
     
@@ -193,13 +212,9 @@
     return YES;
 }
 
-/*
-- (CGFloat)map: (CGFloat)inVal withInputMin:(CGFloat)inMin andInputMax:(CGFloat)inMax andOutputMin:(CGFloat)outMin andOutMax:(CGFloat)outMax
-{
-    CGFloat outVal = outMin + (outMax - outMin) * (inVal - inMin) / (inMax - inMin);
-    if(outVal )
-}
-*/
+
+#pragma mark -Utility Methods
+
 float ofMap(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {
     
 	if (fabs(inputMin - inputMax) < FLT_EPSILON){
@@ -246,6 +261,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         meditationFiles[i].channelIsPlaying = (volume>0);
     }
     
+    submitButton.alpha = resetButton.alpha = [readings count] > 40 ? 1 : 0.4;
+    submitButton.enabled = resetButton.enabled = [readings count] > 40;
+    
     [self reloadSection:SECTION_STATUS];
 }
 
@@ -264,10 +282,50 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [webSocket open];
 }
 
+- (void)processReading:(NSDictionary *)data
+{
+    if(recordButton.selected)
+    {
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
+        [readings addObject:message];
+    }
+}
+
+#pragma mark - Recording
+
+- (void)beginRecording {
+    // Init recorder
+    self.recorder = [[AERecorder alloc] initWithAudioController:audioController];
+    NSString *documentsFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)
+                                 objectAtIndex:0];
+    NSString *filePath = [documentsFolder stringByAppendingPathComponent:@"Recording.aiff"];
+    // Start the recording process
+    NSError *error = NULL;
+    if ( ![self.recorder beginRecordingToFileAtPath:filePath
+                                       fileType:kAudioFileAIFFType
+                                          error:&error] ) {
+        // Report error
+        return;
+    }
+    // Receive both audio input and audio output. Note that if you're using
+    // AEPlaythroughChannel, mentioned above, you may not need to receive the input again.
+    [self.audioController addInputReceiver:self.recorder];
+    [self.audioController addOutputReceiver:self.recorder];
+}
+
+- (void)endRecording
+    {
+    [self.audioController removeInputReceiver:self.recorder];
+    [self.audioController removeOutputReceiver:self.recorder];
+    [self.recorder finishRecording];
+    self.recorder = nil;
+}
 
 #pragma mark - Action Buttons
 
-- (void)record:(id)sender {
+- (void)record:(id)sender
+{
     if(recordButton.selected) {
         recordButton.selected = NO;
     } else {
@@ -276,20 +334,63 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 }
 
 
-- (void)play:(id)sender {
+- (void)submitJourney:(id)sender
+{
+    NSLog(@"submitJourney");
     
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Please enter your email address:" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
+    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    alert.tag = 100;
+    
+    UITextField * alertTextField = [alert textFieldAtIndex:0];
+    alertTextField.keyboardType = UIKeyboardTypeEmailAddress;
+    alertTextField.placeholder = @"you@email.com";
+    [alert show];
+    
+    recordButton.selected = NO;
 }
 
-- (void)toggleSound:(UISwitch*)sender {
+- (void)resetJourney:(id)sender
+{
+    NSLog(@"resetJourney");
+    recordButton.selected = NO;
+    [readings removeAllObjects];
+    interval = 0;
+}
+
+- (void)toggleSound:(UISwitch*)sender
+{
+    [audioController setMuted:!sender.isOn forChannelGroup:brainSoundGroup];
     if ( sender.isOn ) {
         NSLog(@"Sound ON");
-        [self.audioController start:NULL];
+       
     } else {
         NSLog(@"Sound OFF");
-        [self.audioController stop];
+        
     }
 }
 
+
+#pragma mark -AlertView delagate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    
+    if(alertView.tag==100)
+    {
+        NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
+        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
+        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+        NSString* email = [[alertView textFieldAtIndex:0] text];
+        NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email, @"readings": readings};
+        
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        
+        if(webSocket != nil)
+            [webSocket send: jsonString];
+    }
+}
 
 #pragma mark - Motion 
 
@@ -304,6 +405,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                                       @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
                                         @"y": [NSNumber numberWithDouble: userAcceleration.y],
                                         @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
+        
+        [self processReading:reading];
         NSLog(@"Shake motionBegan");
     }
 }
@@ -395,6 +498,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     if([data valueForKey:@"eegHighGamma"])
         highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
     
+    [self processReading: data];
     [self reloadSection: SECTION_THINKGEAR];
 }
 
@@ -436,6 +540,26 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     else {
         NSDictionary *dict = (NSDictionary *)jsonObject;
         NSString* route = [dict valueForKey:@"route"];
+        if([route isEqualToString:@"saveStatus"]) {
+            if([[dict valueForKey:@"status"] isEqualToString:@"OK"]) {
+                NSLog(@"Success saving!");
+                self.successSound.currentTime = 0;
+                self.successSound.channelIsPlaying = YES;
+                [readings removeAllObjects];
+                interval = 0;
+                
+            } else {
+                NSLog(@"Error saving!");
+                self.errorSound.currentTime = 0;
+                self.errorSound.channelIsPlaying = YES;
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[dict valueForKey:@"status"]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                alert.tag = 101;
+                [alert show];
+                
+            }
+        } else {
+            NSLog(@"UNKNOWN ROUTE!");
+        }
     }
 }
 

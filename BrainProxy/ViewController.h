@@ -12,6 +12,7 @@
 #import "TGAccessoryDelegate.h"
 #import "TGAccessoryManager.h"
 #import "TheAmazingAudioEngine.h"
+#import "AERecorder.h"
 
 #define SOCKET_STATUS_CLOSED 1
 #define SOCKET_STATUS_CONNECTING 2
@@ -59,8 +60,10 @@
     CMAcceleration userAcceleration;
     //NSArray* medLoops;
     //NSArray* attLoops;
+    AEChannelGroupRef brainSoundGroup;
     AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
     AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
+    
 }
 
 // SocketRocket
@@ -70,15 +73,16 @@
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 
 @property (retain, nonatomic) AEAudioController *audioController;
+@property (retain, nonatomic) AERecorder *recorder;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (nonatomic, retain) UIButton *recordButton;
-@property (nonatomic, retain) UIButton *playButton;
+@property (nonatomic, retain) UIButton *submitButton;
+@property (nonatomic, retain) UIButton *resetButton;
 @property (nonatomic, retain) UISwitch *soundSwitch;
 
 @property (nonatomic, retain) AEAudioFilePlayer *successSound;
 @property (nonatomic, retain) AEAudioFilePlayer *errorSound;
 @property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
 @property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
-@property (nonatomic, retain) AEAudioFilePlayer *ambientLoop1;
 @property (nonatomic, retain) AEAudioUnitFilter *reverb;
 @end
