@@ -81,7 +81,11 @@
         case 5: color = UIColorFromRGB(0x8366D4); break;
         case 6: color = UIColorFromRGB(0xE33BCF); break;
     }
-    self.window.rootViewController.view.backgroundColor = color;
+    
+    self.viewController.view.backgroundColor = color;
+    self.viewController.tableView.separatorColor = color;
+    self.viewController.tableView.backgroundView = nil;
+    
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

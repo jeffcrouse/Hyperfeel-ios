@@ -63,6 +63,7 @@
     AEChannelGroupRef brainSoundGroup;
     AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
     AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
+    AEAudioFilePlayer* ticks[3];
     
 }
 

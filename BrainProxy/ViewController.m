@@ -20,7 +20,7 @@
 @synthesize soundSwitch;
 @synthesize motionManager;
 @synthesize audioController;
-@synthesize successSound, errorSound, blinkSound, shakeSound;
+@synthesize successSound, errorSound, blinkSound, shakeSound, reverb;
 @synthesize recorder;
 
 
@@ -156,7 +156,7 @@
                                                       audioController:self.audioController
                                                                 error:NULL];
         meditationFiles[i].loop = YES;
-        attentionFiles[i].channelIsPlaying = NO;
+        meditationFiles[i].channelIsPlaying = NO;
     }
     
     brainSoundGroup = [audioController createChannelGroup];
@@ -164,14 +164,29 @@
     [audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS] toChannelGroup:brainSoundGroup];
     [audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS] toChannelGroup:brainSoundGroup];
     [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+    
+    
+    for(int i=0; i<3; i++) {
+        NSString* base = [NSString stringWithFormat:@"ppk-tick-%02d", i+5];
+        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
+        ticks[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
+                                             audioController:self.audioController
+                                                       error:NULL];
+        ticks[i].volume = 0.1;
+        ticks[i].channelIsPlaying = NO;
+
+    }
+    [self.audioController addChannels:[NSArray arrayWithObjects:ticks count:3]];
     [self.audioController start:NULL];
+    
+    
+    
     
     //[self.audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS]];
     //[self.audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS]];
     
     
-    /*
-    
+ 
     AudioComponentDescription component  = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
                                                                            kAudioUnitType_Effect,
                                                                            kAudioUnitSubType_Reverb2);
@@ -181,8 +196,9 @@
                    audioController:audioController
                    error:&error];
     
-    [self.audioController addFilter:self.reverb toChannel:self.ambientLoop1];
-     */
+    
+    [audioController addFilter:reverb toChannelGroup:brainSoundGroup];
+
     
     
     
@@ -264,6 +280,13 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     submitButton.alpha = resetButton.alpha = [readings count] > 40 ? 1 : 0.4;
     submitButton.enabled = resetButton.enabled = [readings count] > 40;
     
+    float avg = (fabs(userAcceleration.x) + fabs(userAcceleration.y) + fabs(userAcceleration.z)) / 3.0;
+    float mix = ofMap(avg, 0, 3, 0, 100, true);
+    AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DryWetMix, kAudioUnitScope_Global, 0, mix, 0);
+
+    float decay = ofMap(fabs(180/M_PI)*attitude.pitch, 0, 90, 0.001, 20, true);
+    AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DecayTimeAt0Hz, kAudioUnitScope_Global, 0, decay, 0);
+    
     [self reloadSection:SECTION_STATUS];
 }
 
@@ -328,8 +351,16 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     if(recordButton.selected) {
         recordButton.selected = NO;
+        
+        ticks[0].currentTime = 0;
+        ticks[0].volume = 0.25;
+        ticks[0].channelIsPlaying = YES;
     } else {
         recordButton.selected = YES;
+        
+        ticks[1].currentTime = 0;
+        ticks[0].volume = 0.25;
+        ticks[1].channelIsPlaying = YES;
     }
 }
 
@@ -468,7 +499,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 
     if([data valueForKey:@"eSenseAttention"]){
         attention = [[data valueForKey:@"eSenseAttention"] intValue];
-        //AudioUnitSetParameter(self.reverb.audioUnit, kReverb2Param_DryWetMix, kAudioUnitScope_Global, 0, attention, 0);
     }
     
     if([data valueForKey:@"eSenseMeditation"])
@@ -643,6 +673,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             
             
         case SECTION_STATUS:
+            // TO DO:  shouldn't reload image every time section is updated!!
             switch(indexPath.row) {
                 case 0:
                     [[cell textLabel] setText:@"Signal Strength"];
@@ -763,15 +794,15 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             switch (indexPath.row) {
                 case 0:
                     [[cell textLabel] setText:@"Yaw"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.yaw]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", (180/M_PI)*attitude.yaw]];
                     break;
                 case 1:
                     [[cell textLabel] setText:@"Pitch"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.pitch]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", (180/M_PI)*attitude.pitch]];
                     break;
                 case 2:
                     [[cell textLabel] setText:@"Roll"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attitude.roll]];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", (180/M_PI)*attitude.roll]];
                     break;
                 case 3:
                     [[cell textLabel] setText:@"X Rotation"];

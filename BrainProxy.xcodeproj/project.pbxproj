@@ -45,6 +45,9 @@
 		1F98025A17C575F0004BDB96 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 1F98024F17C575F0004BDB96 /* README.markdown */; };
 		1F98025B17C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 1F98025017C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F98025C17C575F0004BDB96 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 1F98025217C575F0004BDB96 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1F98026217C58936004BDB96 /* ppk-tick-05.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F98025F17C58936004BDB96 /* ppk-tick-05.wav */; };
+		1F98026317C58936004BDB96 /* ppk-tick-06.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F98026017C58936004BDB96 /* ppk-tick-06.wav */; };
+		1F98026417C58936004BDB96 /* ppk-tick-07.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F98026117C58936004BDB96 /* ppk-tick-07.wav */; };
 		1FA4D93D17C5442000D5A01F /* Error.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93817C543A700D5A01F /* Error.wav */; };
 		1FA4D93E17C5442100D5A01F /* Static.aif in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93917C543A700D5A01F /* Static.aif */; };
 		1FA4D93F17C5442200D5A01F /* Success.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FA4D93A17C543A700D5A01F /* Success.wav */; };
@@ -142,6 +145,9 @@
 		1F98025117C575F0004BDB96 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		1F98025217C575F0004BDB96 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
 		1F98025317C575F0004BDB96 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
+		1F98025F17C58936004BDB96 /* ppk-tick-05.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "ppk-tick-05.wav"; path = "Sounds/ppk-tick-05.wav"; sourceTree = "<group>"; };
+		1F98026017C58936004BDB96 /* ppk-tick-06.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "ppk-tick-06.wav"; path = "Sounds/ppk-tick-06.wav"; sourceTree = "<group>"; };
+		1F98026117C58936004BDB96 /* ppk-tick-07.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "ppk-tick-07.wav"; path = "Sounds/ppk-tick-07.wav"; sourceTree = "<group>"; };
 		1FA4D93817C543A700D5A01F /* Error.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Error.wav; path = Sounds/Error.wav; sourceTree = "<group>"; };
 		1FA4D93917C543A700D5A01F /* Static.aif */ = {isa = PBXFileReference; lastKnownFileType = file; name = Static.aif; path = Sounds/Static.aif; sourceTree = "<group>"; };
 		1FA4D93A17C543A700D5A01F /* Success.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Success.wav; path = Sounds/Success.wav; sourceTree = "<group>"; };
@@ -231,7 +237,7 @@
 				1F3B7C0817C5197B000E2E69 /* ViewController.h */,
 				1F3B7C0917C5197B000E2E69 /* ViewController.m */,
 				1F98024117C575F0004BDB96 /* Modules */,
-				1F98023717C573D9004BDB96 /* TheAMazingAudioEngine */,
+				1F98023717C573D9004BDB96 /* TheAmazingAudioEngine */,
 				1F3B7C3F17C5395E000E2E69 /* ThinkGear */,
 				1F3B7C2C17C531B5000E2E69 /* SocketRocket */,
 				1F3B7BF217C5193A000E2E69 /* Supporting Files */,
@@ -242,6 +248,9 @@
 		1F3B7BF217C5193A000E2E69 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1F98025F17C58936004BDB96 /* ppk-tick-05.wav */,
+				1F98026017C58936004BDB96 /* ppk-tick-06.wav */,
+				1F98026117C58936004BDB96 /* ppk-tick-07.wav */,
 				1FA4D94217C55AD500D5A01F /* Att01.wav */,
 				1FA4D94317C55AD500D5A01F /* Att02.wav */,
 				1FA4D94417C55AD500D5A01F /* Att03.wav */,
@@ -303,12 +312,12 @@
 			path = ThinkGear;
 			sourceTree = "<group>";
 		};
-		1F98023717C573D9004BDB96 /* TheAMazingAudioEngine */ = {
+		1F98023717C573D9004BDB96 /* TheAmazingAudioEngine */ = {
 			isa = PBXGroup;
 			children = (
 				1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */,
 			);
-			name = TheAMazingAudioEngine;
+			name = TheAmazingAudioEngine;
 			sourceTree = "<group>";
 		};
 		1F98023917C573E5004BDB96 /* Products */ = {
@@ -451,6 +460,9 @@
 				1FA4D96017C55AD500D5A01F /* Med05.wav in Resources */,
 				1FA4D96117C55AD500D5A01F /* Med06.wav in Resources */,
 				1F98025A17C575F0004BDB96 /* README.markdown in Resources */,
+				1F98026217C58936004BDB96 /* ppk-tick-05.wav in Resources */,
+				1F98026317C58936004BDB96 /* ppk-tick-06.wav in Resources */,
+				1F98026417C58936004BDB96 /* ppk-tick-07.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
