@@ -14,29 +14,24 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    
-    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
-    
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *appDefaults = @{@"host" : @"ws://cheese.local:8081", @"client_id": [NSNumber numberWithInt:1]};
-    [defaults registerDefaults:appDefaults];
-    [defaults synchronize];
 
-    
     self.viewController = [[ViewController alloc] initWithStyle: UITableViewStyleGrouped];
     self.window.backgroundColor = [UIColor whiteColor];
     self.window.rootViewController = self.viewController;
     
     
-    [[TGAccessoryManager sharedTGAccessoryManager] setupManagerWithInterval:0.1 forAccessoryType:0];
+    [[TGAccessoryManager sharedTGAccessoryManager] setupManagerWithInterval:0.05 forAccessoryType:0];
     [[TGAccessoryManager sharedTGAccessoryManager] setDelegate:self.viewController];
     [[TGAccessoryManager sharedTGAccessoryManager] setRawEnabled:false];
-    if([[TGAccessoryManager sharedTGAccessoryManager] accessory] != nil)
-        [[TGAccessoryManager sharedTGAccessoryManager] startStream];
-    else
-        NSLog(@"No accessory found!");
+    NSLog(@"dispatchInterval=%f", [[TGAccessoryManager sharedTGAccessoryManager] dispatchInterval]);
     
-    NSLog(@"TGAccessory version: %d", [[TGAccessoryManager sharedTGAccessoryManager] getVersion]);
+    
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+    
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *appDefaults = @{@"endpoint": @"http://cheese.local:3000/submit/journey", @"client_id": [NSNumber numberWithInt:1], @"sample_rate": [NSNumber numberWithFloat:1]};
+    [defaults registerDefaults:appDefaults];
     
     
     
@@ -54,6 +49,9 @@
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
+    if([[TGAccessoryManager sharedTGAccessoryManager] connected])
+        [[TGAccessoryManager sharedTGAccessoryManager] stopStream];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -65,14 +63,20 @@
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults synchronize];
+    if([[TGAccessoryManager sharedTGAccessoryManager] accessory] != nil) {
+        [[TGAccessoryManager sharedTGAccessoryManager] startStream];
+        NSLog(@"TGAccessory version: %d", [[TGAccessoryManager sharedTGAccessoryManager] getVersion]);
+    } else
+        NSLog(@"No accessory found!");
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    NSLog(@"standardUserDefaults: %@", [NSUserDefaults standardUserDefaults]);
     
     NSLog(@"applicationDidBecomeActive");
-    NSLog(@"client_id = %d", [userDefaults integerForKey:@"client_id"]);
+    NSLog(@"client_id = %d", [[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]);
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     UIColor* color;
-    switch([userDefaults integerForKey:@"client_id"]) {
+    switch([[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]) {
         case 0: color = UIColorFromRGB(0xFF6363); break;
         case 1: color = UIColorFromRGB(0xFFB62E); break;
         case 2: color = UIColorFromRGB(0xDEDE40); break;

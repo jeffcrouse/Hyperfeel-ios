@@ -8,28 +8,31 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreMotion/CoreMotion.h>
-#import "SRWebSocket.h"
+//#import "SRWebSocket.h"
 #import "TGAccessoryDelegate.h"
 #import "TGAccessoryManager.h"
 #import "TheAmazingAudioEngine.h"
-#import "AERecorder.h"
-
-#define SOCKET_STATUS_CLOSED 1
-#define SOCKET_STATUS_CONNECTING 2
-#define SOCKET_STATUS_OPEN 3
+#import "ASIHTTPRequest.h"
 
 #define SECTION_CONTROLS 0
 #define SECTION_STATUS 1
-#define SECTION_THINKGEAR 2
-#define SECTION_MOTION 3
+#define SECTION_DEBUG 2
+#define SECTION_THINKGEAR 3
+#define SECTION_MOTION 4
+
+
+#define ALERT_TAG_ERROR 101
+#define ALERT_TAG_SUBMIT 100
+#define ALERT_TAG_RESET 102
 
 #define N_ATTENTION_LOOPS 10
 #define N_MEDITATION_LOOPS 6
 
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+#define MIN_READINGS 30
+#define MAX_READINGS 600
 
 
-@interface ViewController : UITableViewController <SRWebSocketDelegate,TGAccessoryDelegate> {
+@interface ViewController : UITableViewController <TGAccessoryDelegate> { //SRWebSocketDelegate
     
     // ThinkGear stuff
     int blinkStrength;
@@ -51,30 +54,28 @@
     float meditationTeir;
     
     // Other stuff
+    //int webSocketStatus;
+    //SRWebSocket *webSocket;
     NSMutableArray* readings;
+    NSMutableArray* events;
     NSTimeInterval interval;
-    int webSocketStatus;
-    SRWebSocket *webSocket;
     CMAttitude* attitude;
     CMRotationRate rotationRate;
     CMAcceleration userAcceleration;
-    //NSArray* medLoops;
-    //NSArray* attLoops;
     AEChannelGroupRef brainSoundGroup;
     AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
     AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
     AEAudioFilePlayer* ticks[3];
-    
+    NSDate* lastReading;
 }
 
 // SocketRocket
-- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
-- (void)webSocketDidOpen:(SRWebSocket *)webSocket;
-- (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
-- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
+//- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message;
+//- (void)webSocketDidOpen:(SRWebSocket *)webSocket;
+//- (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
+//- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean;
 
 @property (retain, nonatomic) AEAudioController *audioController;
-@property (retain, nonatomic) AERecorder *recorder;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (nonatomic, retain) UIButton *recordButton;
 @property (nonatomic, retain) UIButton *submitButton;

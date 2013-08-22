@@ -21,7 +21,7 @@
 @synthesize motionManager;
 @synthesize audioController;
 @synthesize successSound, errorSound, blinkSound, shakeSound, reverb;
-@synthesize recorder;
+
 
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -37,11 +37,17 @@
 {
     [super viewDidLoad];
     
+#pragma mark Init vars
+
+    poorSignalValue = 500;
+    readings = [NSMutableArray arrayWithObjects: nil];
+    events = [NSMutableArray arrayWithObjects: nil];
+    lastReading = [NSDate date];
     
+   
     
-    //
-    //  headerView
-    //
+#pragma mark headerView   
+
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 100)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     
@@ -81,19 +87,17 @@
     [headerView addSubview:submitButton];
     [headerView addSubview:resetButton];
     self.tableView.tableHeaderView = headerView;
+
     
-    
-    //
-    //  Other controls
-    //
+#pragma mark soundSwitch
+
     soundSwitch = [[UISwitch alloc] initWithFrame:CGRectZero];
     [soundSwitch setOn:NO animated:NO];
     [soundSwitch addTarget:self action:@selector(toggleSound:) forControlEvents:UIControlEventValueChanged];
     
     
-    //
-    // motionManager
-    //
+#pragma mark motionManager
+
     [self becomeFirstResponder];
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.deviceMotionUpdateInterval = 0.1;
@@ -105,10 +109,10 @@
                                                 userAcceleration = [motion userAcceleration];
                                                 [self reloadSection: SECTION_MOTION];
                                             }];
+    
+    
+#pragma mark audioController
 
-    //
-    // Create an instance of the audio controller, set it up and start it running
-    //
     self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription] inputEnabled:NO];
     self.audioController.preferredBufferDuration = 0.005;
     
@@ -133,6 +137,7 @@
                                                                                         withExtension:@"aif"]
                                                 audioController:self.audioController
                                                           error:NULL];
+    self.shakeSound.loop = YES;
     self.shakeSound.channelIsPlaying = NO;
     [self.audioController addChannels:[NSArray arrayWithObject:self.shakeSound]];
     
@@ -174,19 +179,12 @@
                                                        error:NULL];
         ticks[i].volume = 0.1;
         ticks[i].channelIsPlaying = NO;
-
     }
     [self.audioController addChannels:[NSArray arrayWithObjects:ticks count:3]];
-    [self.audioController start:NULL];
     
-    
-    
-    
-    //[self.audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS]];
-    //[self.audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS]];
-    
-    
- 
+    //
+    //  REVERB!
+    //
     AudioComponentDescription component  = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
                                                                            kAudioUnitType_Effect,
                                                                            kAudioUnitSubType_Reverb2);
@@ -200,22 +198,33 @@
     [audioController addFilter:reverb toChannelGroup:brainSoundGroup];
 
     
-    
-    
-    
-    //
-    // Init vars
-    //
-    poorSignalValue = 500;
-    webSocketStatus = SOCKET_STATUS_CLOSED;
-    readings = [NSMutableArray arrayWithObjects: nil];
-    
-    //
-    // Initial kickoff
-    //
-    [self wsConnect];
-    [NSTimer scheduledTimerWithTimeInterval:0.1 target: self selector: @selector(update:) userInfo: nil repeats: YES];
+
+#pragma mark KICK IT OFF!
+
+    [self.audioController start:NULL];
+    [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(update:) userInfo:nil repeats:YES];
 }
+
+/*
+-(void)doSample:(NSTimer*)t
+{
+    
+    if(recordButton.selected)
+    {
+        NSDictionary* event = @{@"shake":
+                                    @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
+                                      @"y": [NSNumber numberWithDouble: userAcceleration.y],
+                                      @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
+        
+        NSDictionary* message = @{@"data": event, @"date":[self isoDate]};
+        [events addObject:message];
+    }
+    
+    float sampleRate = [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"];
+    NSLog(@"doSample: %f", sampleRate);
+    [NSTimer scheduledTimerWithTimeInterval:sampleRate target:self selector:@selector(doSample:) userInfo:nil repeats:NO];
+}
+*/
 
 - (void)didReceiveMemoryWarning
 {
@@ -252,6 +261,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 	}
     
 }
+
+
 - (void) update:(NSTimer*)t
 {
     if(recordButton.selected) {
@@ -277,8 +288,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         meditationFiles[i].channelIsPlaying = (volume>0);
     }
     
-    submitButton.alpha = resetButton.alpha = [readings count] > 40 ? 1 : 0.4;
-    submitButton.enabled = resetButton.enabled = [readings count] > 40;
+    submitButton.alpha = resetButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
+    submitButton.enabled = resetButton.enabled = [readings count] > MIN_READINGS;
     
     float avg = (fabs(userAcceleration.x) + fabs(userAcceleration.y) + fabs(userAcceleration.z)) / 3.0;
     float mix = ofMap(avg, 0, 3, 0, 100, true);
@@ -287,34 +298,11 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     float decay = ofMap(fabs(180/M_PI)*attitude.pitch, 0, 90, 0.001, 20, true);
     AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DecayTimeAt0Hz, kAudioUnitScope_Global, 0, decay, 0);
     
-    [self reloadSection:SECTION_STATUS];
+    [self reloadSection:SECTION_DEBUG];
 }
 
-- (void)wsConnect
-{
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults synchronize];
-    
-    webSocketStatus = SOCKET_STATUS_CONNECTING;
-    
-    NSLog( @"host = %@", [userDefaults stringForKey:@"host"] );
-    
-    NSURL* url = [NSURL URLWithString:[userDefaults stringForKey:@"host"]];
-    webSocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:url]];
-    webSocket.delegate = self;
-    [webSocket open];
-}
 
-- (void)processReading:(NSDictionary *)data
-{
-    if(recordButton.selected)
-    {
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
-        NSDictionary* message = @{@"data": data, @"timestamp":timestamp};
-        [readings addObject:message];
-    }
-}
-
+/*
 #pragma mark - Recording
 
 - (void)beginRecording {
@@ -344,7 +332,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [self.recorder finishRecording];
     self.recorder = nil;
 }
-
+*/
 #pragma mark - Action Buttons
 
 - (void)record:(id)sender
@@ -359,7 +347,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         recordButton.selected = YES;
         
         ticks[1].currentTime = 0;
-        ticks[0].volume = 0.25;
+        ticks[1].volume = 0.25;
         ticks[1].channelIsPlaying = YES;
     }
 }
@@ -368,10 +356,13 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 - (void)submitJourney:(id)sender
 {
     NSLog(@"submitJourney");
-    
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Please enter your email address:" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"email"
+                                                     message:@"Please enter your email address (optional):"
+                                                    delegate:self
+                                           cancelButtonTitle:@"Continue"
+                                           otherButtonTitles:nil];
     alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-    alert.tag = 100;
+    alert.tag = ALERT_TAG_SUBMIT;
     
     UITextField * alertTextField = [alert textFieldAtIndex:0];
     alertTextField.keyboardType = UIKeyboardTypeEmailAddress;
@@ -385,8 +376,15 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     NSLog(@"resetJourney");
     recordButton.selected = NO;
-    [readings removeAllObjects];
-    interval = 0;
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Reset?"
+                                                    message:@"Are you sure you want to reset?"
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"OK", nil ];
+    alert.tag = ALERT_TAG_RESET;
+    [alert show];
+
 }
 
 - (void)toggleSound:(UISwitch*)sender
@@ -394,34 +392,98 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [audioController setMuted:!sender.isOn forChannelGroup:brainSoundGroup];
     if ( sender.isOn ) {
         NSLog(@"Sound ON");
-       
     } else {
         NSLog(@"Sound OFF");
-        
     }
 }
 
 
-#pragma mark -AlertView delagate
+#pragma mark - AlertView delagate
+
+
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
     
-    if(alertView.tag==100)
+    if(alertView.tag==ALERT_TAG_RESET && buttonIndex==1)
+    {
+        [readings removeAllObjects];
+        [events removeAllObjects];
+        interval = 0;
+    }
+    
+    if(alertView.tag==ALERT_TAG_ERROR)
+    {
+        
+    }
+    
+    if(alertView.tag==ALERT_TAG_SUBMIT) // SubmitJourney
     {
         NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
-        NSString *timestamp = [NSString stringWithFormat:@"%ld", (long)[[NSDate date] timeIntervalSince1970]];
         NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
         NSString* email = [[alertView textFieldAtIndex:0] text];
-        NSDictionary* data = @{@"client_id": client_id, @"route": @"submit", @"timestamp": timestamp, @"email": email, @"readings": readings};
+        NSDictionary* data = @{@"client_id": client_id,
+                               @"route": @"submit",
+                               @"date": [self isoDate], //[NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]],
+                               @"email": email,
+                               @"readings": readings,
+                               @"events": events};
         
         NSError *error;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
         NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        
-        if(webSocket != nil)
-            [webSocket send: jsonString];
+        NSLog(@"Journey: %@", jsonString);
+  
+        NSURL* url = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] stringForKey:@"endpoint"]];
+        __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+        [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+        [request addRequestHeader:@"Content-Type" value:@"application/json"];
+        [request appendPostData:jsonData];
+        [request setCompletionBlock:^{
+
+            NSError *jsonError = nil;
+            NSData* data = [[request responseString] dataUsingEncoding:NSUTF8StringEncoding];
+            id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
+            if ([jsonObject isKindOfClass:[NSArray class]]) {
+                //NSArray *jsonArray = (NSArray *)jsonObject;
+                // do something with the array?
+            }
+            else {
+                NSDictionary *dict = (NSDictionary *)jsonObject;
+                NSString* status = [dict valueForKey:@"status"];
+                NSLog(@"status = %@", status);
+                if([status isEqualToString:@"OK"]) {
+
+                    self.successSound.currentTime = 0;
+                    self.successSound.channelIsPlaying = YES;
+                    [readings removeAllObjects];
+                    interval = 0;
+                    
+                } else {
+                    
+                    self.errorSound.currentTime = 0;
+                    self.errorSound.channelIsPlaying = YES;
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                    message:[dict valueForKey:@"status"]
+                                                                   delegate:self
+                                                          cancelButtonTitle:@"OK"
+                                                          otherButtonTitles: nil];
+                    alert.tag = ALERT_TAG_ERROR;
+                    [alert show];
+                }
+ 
+            }
+        }];
+        [request setFailedBlock:^{
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[[request error] localizedDescription]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+            alert.tag = ALERT_TAG_ERROR;
+            [alert show];
+        }];
+        [request startSynchronous];
+        //if(webSocket != nil) [webSocket send: jsonString];
     }
 }
+
+
 
 #pragma mark - Motion 
 
@@ -429,16 +491,20 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     if (motion == UIEventSubtypeMotionShake)
     {
-        self.shakeSound.channelIsPlaying = YES;
-        // User was shaking the device.
-        NSLog(@"Shake motionBegan");
-        NSDictionary* reading = @{@"shake":
-                                      @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
-                                        @"y": [NSNumber numberWithDouble: userAcceleration.y],
-                                        @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
         
-        [self processReading:reading];
+        self.shakeSound.channelIsPlaying = YES;
+
         NSLog(@"Shake motionBegan");
+        
+        if(recordButton.selected)
+        {
+            NSDictionary* data = @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
+                                   @"y": [NSNumber numberWithDouble: userAcceleration.y],
+                                   @"z": [NSNumber numberWithDouble: userAcceleration.z]};
+            
+            NSDictionary* event = @{@"eventType": @"shake", @"date":[self isoDate], @"data": data};
+            [events addObject:event];
+        }
     }
 }
 
@@ -446,9 +512,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     if (motion == UIEventSubtypeMotionShake)
     {
-        // User was shaking the device.
+        self.shakeSound.channelIsPlaying = NO;
         NSLog(@"Shake motionEnded");
-        
     }
 }
 
@@ -471,6 +536,16 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [[TGAccessoryManager sharedTGAccessoryManager] startStream];
 }
 
+- (NSString*)isoDate {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    [dateFormatter setLocale:enUSPOSIXLocale];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+
+    NSString *iso8601String = [dateFormatter stringFromDate:[NSDate date]];
+    return iso8601String;
+}
+
 //  This method gets called by the TGAccessoryManager when a ThinkGear-enabled
 //  accessory is disconnected.
 - (void)accessoryDidDisconnect {
@@ -486,23 +561,33 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 //  This method gets called by the TGAccessoryManager when data is received from the
 //  ThinkGear-enabled device.
 - (void)dataReceived:(NSDictionary *)data {
-    
-    if([data valueForKey:@"poorSignal"]) 
+    //NSLog(@"dataReceived");
+    if([data valueForKey:@"poorSignal"]) {
         poorSignalValue = [[data valueForKey:@"poorSignal"] intValue];
+    }
     
     if([data valueForKey:@"blinkStrength"]) {
         blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
-        //NSLog(@"blinkStrength = %d", blinkStrength);
+        if(recordButton.selected)
+        {
+            //NSNumber* timestamp = [NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]];
+            NSDictionary* message = @{@"eventType": @"blink", @"date":[self isoDate], @"data": @{@"strength": [NSNumber numberWithInt:blinkStrength]}};
+            [events addObject:message];
+        }
         //self.blinkSound.currentTime = 0;
         //self.blinkSound.channelIsPlaying = YES;
     }
-
+    
+    BOOL bNewReading = NO;
     if([data valueForKey:@"eSenseAttention"]){
         attention = [[data valueForKey:@"eSenseAttention"] intValue];
+        if(attention>0) bNewReading = YES;
     }
     
-    if([data valueForKey:@"eSenseMeditation"])
+    if([data valueForKey:@"eSenseMeditation"]) {
         meditation = [[data valueForKey:@"eSenseMeditation"] intValue];
+        if(meditation>0) bNewReading = YES;
+    }
     
     if([data valueForKey:@"eegDelta"])
         delta =   [[data valueForKey:@"eegDelta"] intValue];
@@ -528,7 +613,26 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     if([data valueForKey:@"eegHighGamma"])
         highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
     
-    [self processReading: data];
+
+    if(bNewReading && recordButton.selected &&
+       [[NSDate date] timeIntervalSinceDate:lastReading] > [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"])
+    {
+        ticks[2].volume = 0.1;
+        ticks[2].currentTime = 0;
+        ticks[2].channelIsPlaying = YES;
+        NSDictionary* reading = @{@"date":[self isoDate], @"data": @{@"attention": [NSNumber numberWithInt:attention],
+                                                            @"meditation": [NSNumber numberWithInt:meditation]}};
+        [readings addObject:reading];
+        if([readings count]>MAX_READINGS) {
+            //TO DO:  do something!  stop recording?  [readings removeObjectAtIndex:0]?
+        }
+        //NSError *error;
+        //NSLog(@"%@", [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:reading options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding]);
+
+        lastReading = [NSDate date];        
+    }
+    
+    [self reloadSection:SECTION_STATUS];
     [self reloadSection: SECTION_THINKGEAR];
 }
 
@@ -536,7 +640,23 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 #pragma mark - SocketRocket
 
  
+/*
+ 
+- (void)wsConnect
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults synchronize];
 
+    webSocketStatus = SOCKET_STATUS_CONNECTING;
+
+    NSLog( @"host = %@", [userDefaults stringForKey:@"host"] );
+
+    NSURL* url = [NSURL URLWithString:[userDefaults stringForKey:@"host"]];
+    webSocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:url]];
+    webSocket.delegate = self;
+    [webSocket open];
+}
+ 
 - (void)webSocketDidOpen:(SRWebSocket *)_webSocket;
 {
     NSLog(@"Websocket Connected");
@@ -601,7 +721,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [NSTimer scheduledTimerWithTimeInterval: 3.0 target: self
                                    selector: @selector(wsConnect) userInfo: nil repeats: NO];
 }
-
+*/
 
 
 
@@ -613,7 +733,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 4;
+    return 5;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -623,6 +743,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         case SECTION_STATUS: return @"Status";
         case SECTION_THINKGEAR: return @"Brain Activity";
         case SECTION_MOTION: return @"Motion";
+        case SECTION_DEBUG: return @"Debug";
         default:
             return [NSString stringWithFormat:@"Section %d", section];
     }
@@ -644,9 +765,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     // Return the number of rows in the section.
     switch(section) {
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 8;
+        case SECTION_STATUS: return 3;
         case SECTION_THINKGEAR: return 11;
-        case SECTION_MOTION: return 9;
+        case SECTION_MOTION: return 5;
+        case SECTION_DEBUG: return 4;
         default: return 4;
     }    
 }
@@ -667,8 +789,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     switch(indexPath.section) {
             
         case SECTION_CONTROLS:
-            cell.accessoryView = soundSwitch;
             cell.textLabel.text = @"Sound";
+            cell.accessoryView = soundSwitch;
             break;
             
             
@@ -677,6 +799,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             switch(indexPath.row) {
                 case 0:
                     [[cell textLabel] setText:@"Signal Strength"];
+       
                     if(poorSignalValue == 0) {
                         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Connected"]];
                     }
@@ -695,21 +818,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     break;
 
                 case 1:
-                    [[cell textLabel] setText:@"Websocket"];
-                    switch(webSocketStatus) {
-                        case SOCKET_STATUS_CLOSED:
-                            [[cell detailTextLabel] setText:@"Closed"];
-                            break;
-                        case SOCKET_STATUS_CONNECTING:
-                            [[cell detailTextLabel] setText:@"Connecting"];
-                            break;
-                        case SOCKET_STATUS_OPEN:
-                            [[cell detailTextLabel] setText:@"Open"];
-                            break;
-                    }
-                    break;
-                
-                case 2:
                     [[cell textLabel] setText:@"Record Time"];
                     
                     NSInteger ti = (NSInteger)interval;
@@ -718,29 +826,54 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     NSInteger hours = (ti / 3600);
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds]];
                     break;
-                case 3:
+                    
+                case 2:
                     [[cell textLabel] setText:@"Readings"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", [readings count]]];
                     break;
-                case 4:
+
+                    /*
+                     case 1:
+                     [[cell textLabel] setText:@"Websocket"];
+                     switch(webSocketStatus) {
+                     case SOCKET_STATUS_CLOSED:
+                     [[cell detailTextLabel] setText:@"Closed"];
+                     break;
+                     case SOCKET_STATUS_CONNECTING:
+                     [[cell detailTextLabel] setText:@"Connecting"];
+                     break;
+                     case SOCKET_STATUS_OPEN:
+                     [[cell detailTextLabel] setText:@"Open"];
+                     break;
+                     }
+                     break;
+                     */
+            }
+            break;
+            
+        case SECTION_DEBUG:
+           
+            switch(indexPath.row) {
+                case 0:
                     [[cell textLabel] setText:@"Meditation Eased"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", meditationEased]];
                     break;
-                case 5:
+                case 1:
                     [[cell textLabel] setText:@"Attention Eased"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attentionEased]];
                     break;
-                case 6:
+                case 2:
                     [[cell textLabel] setText:@"Meditation Teir"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", meditationTeir]];
                     break;
-                case 7:
+                case 3:
                     [[cell textLabel] setText:@"Attention Teir"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attentionTeir]];
                     break;
             }
             break;
-
+            
+            
         case SECTION_THINKGEAR:
             switch (indexPath.row) {
                 case 0:
@@ -805,29 +938,18 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", (180/M_PI)*attitude.roll]];
                     break;
                 case 3:
-                    [[cell textLabel] setText:@"X Rotation"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.x]];
+                    [[cell textLabel] setText:@"Rotation Speed"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f, %.2f, %.2f",
+                                                     rotationRate.x,
+                                                     rotationRate.y,
+                                                     rotationRate.z]];
                     break;
                 case 4:
-                    [[cell textLabel] setText:@"Y Rotation"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.y]];
-                    break;
-                case 5:
-                    [[cell textLabel] setText:@"Z Rotation"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", rotationRate.z]];
-                    break;
-                case 6:
-                    [[cell textLabel] setText:@"X Acceleration"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.x]];
-                    break;
-                case 7:
-                    [[cell textLabel] setText:@"Y Acceleration"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.y]];
-                    break;
-                case 8:
-                    [[cell textLabel] setText:@"Z Acceleration"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", userAcceleration.z]];
-                    break;
+                    [[cell textLabel] setText:@"User Acceleration"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f, %.2f, %.2f",
+                                                     userAcceleration.x,
+                                                     userAcceleration.y,
+                                                     userAcceleration.z]];
                 default:
                     break;
             }
