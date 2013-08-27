@@ -30,10 +30,12 @@
     
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *appDefaults = @{@"endpoint": @"http://cheese.local:3000/submit/journey", @"client_id": [NSNumber numberWithInt:1], @"sample_rate": [NSNumber numberWithFloat:1]};
+    NSDictionary *appDefaults = @{@"endpoint": @"http://brainz.io/submit/journey",
+                                  @"client_id": [NSNumber numberWithInt:1],
+                                  @"sample_rate": [NSNumber numberWithFloat:1]};
     [defaults registerDefaults:appDefaults];
     
-    
+     
     
     [self.window makeKeyAndVisible];
     return YES;

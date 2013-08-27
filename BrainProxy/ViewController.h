@@ -29,7 +29,7 @@
 #define N_MEDITATION_LOOPS 6
 
 #define MIN_READINGS 30
-#define MAX_READINGS 600
+#define MAX_READINGS 64*64
 
 
 @interface ViewController : UITableViewController <TGAccessoryDelegate> { //SRWebSocketDelegate

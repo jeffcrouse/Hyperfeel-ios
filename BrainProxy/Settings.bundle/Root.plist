@@ -42,7 +42,7 @@
 			<key>KeyboardType</key>
 			<string>URL</string>
 			<key>DefaultValue</key>
-			<string>http://cheese.local:3000/submit/journey</string>
+			<string>http://brainz.io/submit/journey</string>
 		</dict>
 		<dict>
 			<key>Type</key>
