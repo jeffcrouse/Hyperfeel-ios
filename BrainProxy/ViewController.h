@@ -25,8 +25,8 @@
 #define ALERT_TAG_SUBMIT 100
 #define ALERT_TAG_RESET 102
 
-#define N_ATTENTION_LOOPS 10
-#define N_MEDITATION_LOOPS 6
+//#define N_ATTENTION_LOOPS 10
+//#define N_MEDITATION_LOOPS 6
 
 #define MIN_READINGS 30
 #define MAX_READINGS 64*64
@@ -63,8 +63,10 @@
     CMRotationRate rotationRate;
     CMAcceleration userAcceleration;
     AEChannelGroupRef brainSoundGroup;
-    AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
-    AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
+    NSMutableArray* attentionLoops;
+    NSMutableArray* meditationLoops;
+    //AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
+    //AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
     AEAudioFilePlayer* ticks[3];
     NSDate* lastReading;
 }
@@ -84,7 +86,7 @@
 
 @property (nonatomic, retain) AEAudioFilePlayer *successSound;
 @property (nonatomic, retain) AEAudioFilePlayer *errorSound;
-@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
-@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
+//@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
+//@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
 @property (nonatomic, retain) AEAudioUnitFilter *reverb;
 @end

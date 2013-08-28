@@ -31,7 +31,6 @@
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSDictionary *appDefaults = @{@"endpoint": @"http://brainz.io/submit/journey",
-                                  @"client_id": [NSNumber numberWithInt:1],
                                   @"sample_rate": [NSNumber numberWithFloat:1]};
     [defaults registerDefaults:appDefaults];
     
@@ -88,6 +87,9 @@
         case 4: color = UIColorFromRGB(0x00B7C4); break;
         case 5: color = UIColorFromRGB(0x8366D4); break;
         case 6: color = UIColorFromRGB(0xE33BCF); break;
+         case 7: color = UIColorFromRGB(0xE33BCF); break;
+         case 8: color = UIColorFromRGB(0xE33BCF); break;
+         case 9: color = UIColorFromRGB(0xE33BCF); break;
     }
     
     self.viewController.view.backgroundColor = color;

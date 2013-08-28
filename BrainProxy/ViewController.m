@@ -20,7 +20,7 @@
 @synthesize soundSwitch;
 @synthesize motionManager;
 @synthesize audioController;
-@synthesize successSound, errorSound, blinkSound, shakeSound, reverb;
+@synthesize successSound, errorSound, reverb; //, blinkSound, shakeSound, ;
 
 
 
@@ -36,7 +36,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    NSLog(@"currentDevice name = %@", [[UIDevice currentDevice] name]);
 #pragma mark Init vars
 
     poorSignalValue = 500;
@@ -117,14 +117,26 @@
     self.audioController.preferredBufferDuration = 0.005;
     
     
-    self.successSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Success"
-                                                                                          withExtension:@"wav"]
-                                             audioController:self.audioController
+    NSURL* successSoundURL = [[NSBundle mainBundle] URLForResource:@"Success" withExtension:@"wav"];
+    successSound = [AEAudioFilePlayer audioFilePlayerWithURL:successSoundURL
+                                                  audioController:self.audioController
                                                        error:NULL];
-    self.successSound.volume = 0.5;
-    self.successSound.channelIsPlaying = NO;
-    [self.audioController addChannels:[NSArray arrayWithObject:self.successSound]];
+    successSound.volume = 0.5;
+    successSound.channelIsPlaying = NO;
     
+
+    NSURL* errorSoundURL = [[NSBundle mainBundle] URLForResource:@"Error" withExtension:@"wav"];
+    errorSound = [AEAudioFilePlayer audioFilePlayerWithURL:errorSoundURL
+                                                  audioController:self.audioController
+                                                            error:NULL];
+    errorSound.volume = 0.5;
+    errorSound.channelIsPlaying = NO;
+    
+    
+    [audioController addChannels:[NSArray arrayWithObjects:successSound, errorSound, nil]];
+    
+    
+    /*
     self.blinkSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Blink"
                                                                                         withExtension:@"wav"]
                                                   audioController:self.audioController
@@ -140,9 +152,73 @@
     self.shakeSound.loop = YES;
     self.shakeSound.channelIsPlaying = NO;
     [self.audioController addChannels:[NSArray arrayWithObject:self.shakeSound]];
+    */
     
     
-
+    brainSoundGroup = [audioController createChannelGroup];
+    [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+    
+    
+    
+        
+    NSArray* attentionSounds = @[@"Silence",
+                                @"BrainWave03-Attn",
+                                @"BrainWave06-Attn",
+                                @"Silence",
+                                @"BRainWave16-Attn",
+                                @"BrainWave07-Attn",
+                                @"BrainWave10-Attn",
+                                @"Silence",
+                                @"BrainWave09-Attn",
+                                @"BrainWave17-Attn",
+                                @"Silence"];
+    
+    NSArray* meditationSounds = @[@"Silence",
+                                @"BrainWave15-Med",
+                                @"BrainWave11-Med",
+                                @"Silence",
+                                @"BrainWave04-Both",
+                                @"BrainWave12-Med",
+                                @"BrainWave14-Both",
+                                @"BrainWave13-Med",
+                                @"Silence"];
+    
+    attentionLoops = [[NSMutableArray alloc] init];
+    //for (id fname in attentionSounds) {
+    for(int i=0; i<[attentionSounds count]; i++)
+    {
+        NSURL* url = [[NSBundle mainBundle] URLForResource:[attentionSounds objectAtIndex:i] withExtension:@"wav"];
+        NSLog(@"Loading %@", url);
+        NSError* err;
+        AEAudioFilePlayer *filePlayer = [AEAudioFilePlayer audioFilePlayerWithURL:url
+                                                      audioController:self.audioController
+                                                                error:&err];
+        if(err)
+            NSLog(@"%@", [err localizedDescription]);
+        filePlayer.loop = YES;
+        filePlayer.channelIsPlaying = NO;
+        [attentionLoops addObject:filePlayer];
+    }
+    
+    meditationLoops = [[NSMutableArray alloc] init];
+    //for (id fname in meditationSounds)
+    for(int i=0; i<[meditationSounds count]; i++)
+    {
+        NSURL* url = [[NSBundle mainBundle] URLForResource:[meditationSounds objectAtIndex:i] withExtension:@"wav"];
+        NSLog(@"Loading %@", url);
+        NSError* err;
+        AEAudioFilePlayer *filePlayer = [AEAudioFilePlayer audioFilePlayerWithURL:url
+                                                                  audioController:self.audioController
+                                                                            error:&err];
+        if(err) 
+            NSLog(@"%@", [err localizedDescription]);
+ 
+        filePlayer.loop = YES;
+        filePlayer.channelIsPlaying = NO;
+        [meditationLoops addObject:filePlayer];
+    }
+    
+    /*
     for(int i=0; i<N_ATTENTION_LOOPS; i++) {
         NSString* base = [NSString stringWithFormat:@"Att%02d", i+1];
         NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
@@ -154,6 +230,7 @@
     }
     
     
+    
     for(int i=0; i<N_MEDITATION_LOOPS; i++) {
         NSString* base = [NSString stringWithFormat:@"Med%02d", i+1];
         NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
@@ -163,16 +240,16 @@
         meditationFiles[i].loop = YES;
         meditationFiles[i].channelIsPlaying = NO;
     }
-    
-    brainSoundGroup = [audioController createChannelGroup];
-    
-    [audioController addChannels:[NSArray arrayWithObjects:attentionFiles count:N_ATTENTION_LOOPS] toChannelGroup:brainSoundGroup];
-    [audioController addChannels:[NSArray arrayWithObjects:meditationFiles count:N_MEDITATION_LOOPS] toChannelGroup:brainSoundGroup];
-    [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+     */
+    [audioController addChannels:attentionLoops toChannelGroup:brainSoundGroup];
+    [audioController addChannels:meditationLoops toChannelGroup:brainSoundGroup];
     
     
+    //
+    // TICKS
+    //
     for(int i=0; i<3; i++) {
-        NSString* base = [NSString stringWithFormat:@"ppk-tick-%02d", i+5];
+        NSString* base = [NSString stringWithFormat:@"Tick%02d", i+1];
         NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
         ticks[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
                                              audioController:self.audioController
@@ -181,6 +258,7 @@
         ticks[i].channelIsPlaying = NO;
     }
     [self.audioController addChannels:[NSArray arrayWithObjects:ticks count:3]];
+    
     
     //
     //  REVERB!
@@ -262,6 +340,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     
 }
 
+#define LOOP_FALLOFF 2
 
 - (void) update:(NSTimer*)t
 {
@@ -269,23 +348,26 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         interval += [t timeInterval];
     }
     
-    attentionEased += (attention-attentionEased) / 10.0;
-    meditationEased += (meditation-meditationEased) / 10.0;
-    attentionTeir = ofMap(attentionEased, 0, 100, 0, N_ATTENTION_LOOPS, true);
-    meditationTeir = ofMap(meditationEased, 0, 100, 0, N_MEDITATION_LOOPS, true);
+    attentionEased += (attention-attentionEased) / 20.0;
+    meditationEased += (meditation-meditationEased) / 20.0;
+    attentionTeir = ofMap(attentionEased, 0, 100, 0, [attentionLoops count], true);
+    meditationTeir = ofMap(meditationEased, 0, 100, 0, [meditationLoops count], true);
     
-    for(int i=0; i<N_ATTENTION_LOOPS; i++) {
+    AEAudioFilePlayer* filePlayer;
+    for(int i=0; i<[attentionLoops count]; i++) {
         float dist = fabs(attentionTeir - i);
-        float volume = ofMap(dist, 0, 1.0, 0.25, 0, true);
-        attentionFiles[i].volume = volume;
-        attentionFiles[i].channelIsPlaying = (volume>0);
+        float volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer = [attentionLoops objectAtIndex:i];
+        filePlayer.volume = volume;
+        filePlayer.channelIsPlaying = (volume>0);
     }
     
-    for(int i=0; i<N_MEDITATION_LOOPS; i++) {
+    for(int i=0; i<[meditationLoops count]; i++) {
         float dist = fabs(meditationTeir - i);
-        float volume = ofMap(dist, 0, 1.0, 0.25, 0, true);
-        meditationFiles[i].volume = volume;
-        meditationFiles[i].channelIsPlaying = (volume>0);
+        float volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer = [meditationLoops objectAtIndex:i];
+        filePlayer.volume = volume;
+        filePlayer.channelIsPlaying = (volume>0);
     }
     
     submitButton.alpha = resetButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
@@ -419,9 +501,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     if(alertView.tag==ALERT_TAG_SUBMIT) // SubmitJourney
     {
         NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
-        NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+        //NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
         NSString* email = [[alertView textFieldAtIndex:0] text];
-        NSDictionary* data = @{@"client_id": client_id,
+        NSDictionary* data = @{@"client_id": [[UIDevice currentDevice] name],
                                @"route": @"submit",
                                @"date": [self isoDate], //[NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]],
                                @"email": email,
@@ -491,9 +573,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     if (motion == UIEventSubtypeMotionShake)
     {
-        
-        self.shakeSound.channelIsPlaying = YES;
-
         NSLog(@"Shake motionBegan");
         
         if(recordButton.selected)
@@ -512,7 +591,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     if (motion == UIEventSubtypeMotionShake)
     {
-        self.shakeSound.channelIsPlaying = NO;
         NSLog(@"Shake motionEnded");
     }
 }
@@ -765,7 +843,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     // Return the number of rows in the section.
     switch(section) {
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 3;
+        case SECTION_STATUS: return 4;
         case SECTION_THINKGEAR: return 11;
         case SECTION_MOTION: return 5;
         case SECTION_DEBUG: return 4;
@@ -848,6 +926,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                      }
                      break;
                      */
+                case 3:
+                    [[cell textLabel] setText:@"Device Name"];
+                    [[cell detailTextLabel] setText:[[UIDevice currentDevice] name]];
+                    break;
             }
             break;
             
