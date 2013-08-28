@@ -75,6 +75,8 @@
     NSLog(@"standardUserDefaults: %@", [NSUserDefaults standardUserDefaults]);
     
     NSLog(@"applicationDidBecomeActive");
+    
+    /*
     NSLog(@"client_id = %d", [[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]);
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     UIColor* color;
@@ -91,7 +93,7 @@
     self.viewController.view.backgroundColor = color;
     self.viewController.tableView.separatorColor = color;
     self.viewController.tableView.backgroundView = nil;
-    
+    */
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

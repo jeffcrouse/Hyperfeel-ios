@@ -31,6 +31,8 @@
 		1F3B7C4717C53B61000E2E69 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */; };
 		1F3B7C4917C53B65000E2E69 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */; };
 		1F3B7C4B17C53B8B000E2E69 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */; };
+		1F7644AD17CE79AD00C7CAD9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644AC17CE79AD00C7CAD9 /* Icon.png */; };
+		1F7644AF17CE79B100C7CAD9 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */; };
 		1F98024017C573F1004BDB96 /* libTheAmazingAudioEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F98023D17C573E5004BDB96 /* libTheAmazingAudioEngine.a */; };
 		1F98026217C58936004BDB96 /* ppk-tick-05.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F98025F17C58936004BDB96 /* ppk-tick-05.wav */; };
 		1F98026317C58936004BDB96 /* ppk-tick-06.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F98026017C58936004BDB96 /* ppk-tick-06.wav */; };
@@ -87,14 +89,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1F3B7BE817C5193A000E2E69 /* BrainProxy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainProxy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F3B7BE817C5193A000E2E69 /* Hyperfeel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hyperfeel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F3B7BEB17C5193A000E2E69 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1F3B7BED17C5193A000E2E69 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1F3B7BEF17C5193A000E2E69 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		1F3B7BF317C5193A000E2E69 /* BrainProxy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BrainProxy-Info.plist"; sourceTree = "<group>"; };
+		1F3B7BF317C5193A000E2E69 /* Hyperfeel-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Hyperfeel-Info.plist"; sourceTree = "<group>"; };
 		1F3B7BF517C5193A000E2E69 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1F3B7BF717C5193A000E2E69 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		1F3B7BF917C5193A000E2E69 /* BrainProxy-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BrainProxy-Prefix.pch"; sourceTree = "<group>"; };
+		1F3B7BF917C5193A000E2E69 /* Hyperfeel-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Hyperfeel-Prefix.pch"; sourceTree = "<group>"; };
 		1F3B7BFA17C5193A000E2E69 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1F3B7BFB17C5193A000E2E69 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		1F3B7BFD17C5193A000E2E69 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -119,6 +121,8 @@
 		1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		1F7644AC17CE79AD00C7CAD9 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
+		1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TheAmazingAudioEngine.xcodeproj; path = TheAmazingAudioEngine/TheAmazingAudioEngine.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1F98025F17C58936004BDB96 /* ppk-tick-05.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "ppk-tick-05.wav"; path = "Sounds/ppk-tick-05.wav"; sourceTree = "<group>"; };
 		1F98026017C58936004BDB96 /* ppk-tick-06.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "ppk-tick-06.wav"; path = "Sounds/ppk-tick-06.wav"; sourceTree = "<group>"; };
@@ -208,7 +212,7 @@
 		1F3B7BE917C5193A000E2E69 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1F3B7BE817C5193A000E2E69 /* BrainProxy.app */,
+				1F3B7BE817C5193A000E2E69 /* Hyperfeel.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -252,6 +256,8 @@
 		1F3B7BF217C5193A000E2E69 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */,
+				1F7644AC17CE79AD00C7CAD9 /* Icon.png */,
 				1F98025F17C58936004BDB96 /* ppk-tick-05.wav */,
 				1F98026017C58936004BDB96 /* ppk-tick-06.wav */,
 				1F98026117C58936004BDB96 /* ppk-tick-07.wav */,
@@ -276,10 +282,10 @@
 				1F3B7C1117C52E2F000E2E69 /* Signal_Connecting2.png */,
 				1F3B7C1217C52E2F000E2E69 /* Signal_Connecting3.png */,
 				1F3B7C1317C52E2F000E2E69 /* Signal_Disconnected.png */,
-				1F3B7BF317C5193A000E2E69 /* BrainProxy-Info.plist */,
+				1F3B7BF317C5193A000E2E69 /* Hyperfeel-Info.plist */,
 				1F3B7BF417C5193A000E2E69 /* InfoPlist.strings */,
 				1F3B7BF717C5193A000E2E69 /* main.m */,
-				1F3B7BF917C5193A000E2E69 /* BrainProxy-Prefix.pch */,
+				1F3B7BF917C5193A000E2E69 /* Hyperfeel-Prefix.pch */,
 				1F3B7BFD17C5193A000E2E69 /* Default.png */,
 				1F3B7BFF17C5193A000E2E69 /* Default@2x.png */,
 				1F3B7C0117C5193A000E2E69 /* Default-568h@2x.png */,
@@ -358,9 +364,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1F3B7BE717C5193A000E2E69 /* BrainProxy */ = {
+		1F3B7BE717C5193A000E2E69 /* Hyperfeel */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1F3B7C0517C5193A000E2E69 /* Build configuration list for PBXNativeTarget "BrainProxy" */;
+			buildConfigurationList = 1F3B7C0517C5193A000E2E69 /* Build configuration list for PBXNativeTarget "Hyperfeel" */;
 			buildPhases = (
 				1F3B7BE417C5193A000E2E69 /* Sources */,
 				1F3B7BE517C5193A000E2E69 /* Frameworks */,
@@ -371,9 +377,9 @@
 			dependencies = (
 				1F98023F17C573EE004BDB96 /* PBXTargetDependency */,
 			);
-			name = BrainProxy;
+			name = Hyperfeel;
 			productName = BrainProxy;
-			productReference = 1F3B7BE817C5193A000E2E69 /* BrainProxy.app */;
+			productReference = 1F3B7BE817C5193A000E2E69 /* Hyperfeel.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -385,7 +391,7 @@
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Jeffrey Crouse";
 			};
-			buildConfigurationList = 1F3B7BE317C51939000E2E69 /* Build configuration list for PBXProject "BrainProxy" */;
+			buildConfigurationList = 1F3B7BE317C51939000E2E69 /* Build configuration list for PBXProject "Hyperfeel" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -403,7 +409,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				1F3B7BE717C5193A000E2E69 /* BrainProxy */,
+				1F3B7BE717C5193A000E2E69 /* Hyperfeel */,
 			);
 		};
 /* End PBXProject section */
@@ -456,6 +462,8 @@
 				1F98026217C58936004BDB96 /* ppk-tick-05.wav in Resources */,
 				1F98026317C58936004BDB96 /* ppk-tick-06.wav in Resources */,
 				1F98026417C58936004BDB96 /* ppk-tick-07.wav in Resources */,
+				1F7644AD17CE79AD00C7CAD9 /* Icon.png in Resources */,
+				1F7644AF17CE79B100C7CAD9 /* Icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,17 +571,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
+				GCC_PREFIX_HEADER = "BrainProxy/Hyperfeel-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"",
 					"\"$(SRCROOT)/TheAmazingAudioEngine/Modules\"",
 				);
-				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
+				INFOPLIST_FILE = "BrainProxy/Hyperfeel-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/BrainProxy/ThinkGear\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Hyperfeel;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -582,17 +590,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "BrainProxy/BrainProxy-Prefix.pch";
+				GCC_PREFIX_HEADER = "BrainProxy/Hyperfeel-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/TheAmazingAudioEngine/TheAmazingAudioEngine\"",
 					"\"$(SRCROOT)/TheAmazingAudioEngine/Modules\"",
 				);
-				INFOPLIST_FILE = "BrainProxy/BrainProxy-Info.plist";
+				INFOPLIST_FILE = "BrainProxy/Hyperfeel-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/BrainProxy/ThinkGear\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Hyperfeel;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -600,7 +608,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1F3B7BE317C51939000E2E69 /* Build configuration list for PBXProject "BrainProxy" */ = {
+		1F3B7BE317C51939000E2E69 /* Build configuration list for PBXProject "Hyperfeel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1F3B7C0317C5193A000E2E69 /* Debug */,
@@ -609,7 +617,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1F3B7C0517C5193A000E2E69 /* Build configuration list for PBXNativeTarget "BrainProxy" */ = {
+		1F3B7C0517C5193A000E2E69 /* Build configuration list for PBXNativeTarget "Hyperfeel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1F3B7C0617C5193A000E2E69 /* Debug */,

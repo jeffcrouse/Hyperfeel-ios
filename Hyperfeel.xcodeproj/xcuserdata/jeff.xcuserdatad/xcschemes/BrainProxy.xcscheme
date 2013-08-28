@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
                BuildableName = "BrainProxy.app"
-               BlueprintName = "BrainProxy"
-               ReferencedContainer = "container:BrainProxy.xcodeproj">
+               BlueprintName = "Hyperfeel"
+               ReferencedContainer = "container:Hyperfeel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,8 +34,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
-            BlueprintName = "BrainProxy"
-            ReferencedContainer = "container:BrainProxy.xcodeproj">
+            BlueprintName = "Hyperfeel"
+            ReferencedContainer = "container:Hyperfeel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -53,8 +53,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
-            BlueprintName = "BrainProxy"
-            ReferencedContainer = "container:BrainProxy.xcodeproj">
+            BlueprintName = "Hyperfeel"
+            ReferencedContainer = "container:Hyperfeel.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -71,8 +71,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1F3B7BE717C5193A000E2E69"
             BuildableName = "BrainProxy.app"
-            BlueprintName = "BrainProxy"
-            ReferencedContainer = "container:BrainProxy.xcodeproj">
+            BlueprintName = "Hyperfeel"
+            ReferencedContainer = "container:Hyperfeel.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
