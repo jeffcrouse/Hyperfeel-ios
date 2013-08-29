@@ -32,9 +32,9 @@
 			<key>Type</key>
 			<string>PSTextFieldSpecifier</string>
 			<key>Title</key>
-			<string>Endpoint</string>
+			<string>Server</string>
 			<key>Key</key>
-			<string>endpoint</string>
+			<string>server</string>
 			<key>AutocorrectionType</key>
 			<string>No</string>
 			<key>AutocapitalizationType</key>
@@ -42,7 +42,7 @@
 			<key>KeyboardType</key>
 			<string>URL</string>
 			<key>DefaultValue</key>
-			<string>http://brainz.io/submit/journey</string>
+			<string>http://cheese.local:3000</string>
 		</dict>
 	</array>
 	<key>StringsTable</key>

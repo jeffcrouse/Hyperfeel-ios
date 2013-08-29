@@ -30,7 +30,7 @@
     
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *appDefaults = @{@"endpoint": @"http://brainz.io/submit/journey",
+    NSDictionary *appDefaults = @{@"server": @"http://cheese.local:3000",
                                   @"sample_rate": [NSNumber numberWithFloat:1]};
     [defaults registerDefaults:appDefaults];
     

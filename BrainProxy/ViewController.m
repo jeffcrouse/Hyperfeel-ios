@@ -45,7 +45,7 @@
     lastRecordedReading = [[NSDate date] dateByAddingTimeInterval:-20];
     lastDataReceived = [[NSDate date] dateByAddingTimeInterval:-20];
     SSID = @"None";
-   
+    connectivityStatus = @"Unknown";
     
 #pragma mark headerView   
 
@@ -249,30 +249,11 @@
 #pragma mark KICK IT OFF!
     
     [self.audioController start:NULL];
+    [NSTimer scheduledTimerWithTimeInterval:8 target:self selector:@selector(connectivityCheck:) userInfo:nil repeats:YES];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(update:) userInfo:nil repeats:YES];
     [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(slowUpdate:) userInfo:nil repeats:YES];
 }
 
-/*
--(void)doSample:(NSTimer*)t
-{
-    
-    if(recordButton.selected)
-    {
-        NSDictionary* event = @{@"shake":
-                                    @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
-                                      @"y": [NSNumber numberWithDouble: userAcceleration.y],
-                                      @"z": [NSNumber numberWithDouble: userAcceleration.z]}};
-        
-        NSDictionary* message = @{@"data": event, @"date":[self isoDate]};
-        [events addObject:message];
-    }
-    
-    float sampleRate = [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"];
-    NSLog(@"doSample: %f", sampleRate);
-    [NSTimer scheduledTimerWithTimeInterval:sampleRate target:self selector:@selector(doSample:) userInfo:nil repeats:NO];
-}
-*/
 
 - (void)didReceiveMemoryWarning
 {
@@ -287,6 +268,7 @@
 
 
 #pragma mark -Utility Methods
+
 
 float ofMap(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {
     
@@ -307,9 +289,30 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 		}
 		return outVal;
 	}
-    
 }
 
+
+
+#pragma mark - NSTimer 
+
+-(void)connectivityCheck:(NSTimer*)t
+{
+    connectivityStatus = @"Checking...";
+    
+    NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/ping", [[NSUserDefaults standardUserDefaults] stringForKey:@"server"]]];
+    // __block   ... removed??
+    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+
+    [request setCompletionBlock:^{
+        connectivityStatus = [request responseString];
+    }];
+    [request setFailedBlock:^{
+        connectivityStatus = [[request error] localizedDescription];
+    }];
+    [request startAsynchronous];
+    
+    [self reloadSection:SECTION_STATUS];
+}
 
 -(void)slowUpdate:(NSTimer*)t
 {
@@ -322,7 +325,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [self reloadSection:SECTION_STATUS];
 }
 
-#define LOOP_FALLOFF 2
+
 
 - (void) update:(NSTimer*)t
 {
@@ -514,8 +517,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         NSLog(@"Journey: %@", jsonString);
   
-        NSURL* url = [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] stringForKey:@"endpoint"]];
-        __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/submit/journey", [[NSUserDefaults standardUserDefaults] stringForKey:@"server"]]];
+        // __block   ... removed??
+        ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
         [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
         [request addRequestHeader:@"Content-Type" value:@"application/json"];
         [request appendPostData:jsonData];
@@ -559,8 +564,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             alert.tag = ALERT_TAG_ERROR;
             [alert show];
         }];
-        [request startSynchronous];
-        //if(webSocket != nil) [webSocket send: jsonString];
+        [request startAsynchronous];
     }
 }
 
@@ -648,6 +652,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         {
             NSDictionary* message = @{@"eventType": @"blink", @"date":[self isoDate], @"data": @{@"strength": [NSNumber numberWithInt:blinkStrength]}};
             [events addObject:message];
+            if([events count] > MAX_READINGS) {
+                [events removeObjectAtIndex:0];
+            }
         }
         //self.blinkSound.currentTime = 0;
         //self.blinkSound.channelIsPlaying = YES;
@@ -703,7 +710,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                                                                          @"meditation": [NSNumber numberWithInt:meditation]}};
             [readings addObject:reading];
             if([readings count]>MAX_READINGS) {
-                //TO DO:  do something!  stop recording?  [readings removeObjectAtIndex:0]?
+                [readings removeObjectAtIndex:0];
             }
             //NSError *error;
             //NSLog(@"%@", [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:reading options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding]);
@@ -848,7 +855,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     switch(section) {
         case SECTION_RECORDING: return 2;
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 3;
+        case SECTION_STATUS: return 4;
         case SECTION_THINKGEAR: return 11;
         case SECTION_MOTION: return 5;
         case SECTION_DEBUG: return 5;
@@ -919,7 +926,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Signal_Disconnected"]];
                     }
                     break;
-
                 case 1:
                     [[cell textLabel] setText:@"Device Name"];
                     [[cell detailTextLabel] setText:[[UIDevice currentDevice] name]];
@@ -927,6 +933,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                 case 2:
                     [[cell textLabel] setText:@"WiFi Network"];
                     [[cell detailTextLabel] setText:SSID];
+                    break;
+                case 3:
+                    [[cell textLabel] setText:@"Connectivity"];
+                    [[cell detailTextLabel] setText:connectivityStatus];
                     break;
             }
             break;

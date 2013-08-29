@@ -27,8 +27,7 @@
 #define ALERT_TAG_SUBMIT 100
 #define ALERT_TAG_RESET 102
 
-//#define N_ATTENTION_LOOPS 10
-//#define N_MEDITATION_LOOPS 6
+#define LOOP_FALLOFF 2
 
 #define MIN_READINGS 30
 #define MAX_READINGS 64*64
@@ -75,6 +74,7 @@
     NSDate* lastRecordedReading;
     NSDate* lastDataReceived;
     NSString* SSID;
+    NSString* connectivityStatus;
 }
 
 // SocketRocket
