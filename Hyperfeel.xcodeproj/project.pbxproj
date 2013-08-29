@@ -31,6 +31,7 @@
 		1F3B7C4717C53B61000E2E69 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */; };
 		1F3B7C4917C53B65000E2E69 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */; };
 		1F3B7C4B17C53B8B000E2E69 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */; };
+		1F51A0E717CF6A8D00EFC5FE /* AdjustHeadset.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F51A0E617CF6A8D00EFC5FE /* AdjustHeadset.wav */; };
 		1F7644AD17CE79AD00C7CAD9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644AC17CE79AD00C7CAD9 /* Icon.png */; };
 		1F7644AF17CE79B100C7CAD9 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */; };
 		1F7644B517CE8B3100C7CAD9 /* Error.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644B317CE8B3100C7CAD9 /* Error.wav */; };
@@ -121,6 +122,7 @@
 		1F3B7C4617C53B61000E2E69 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		1F3B7C4817C53B65000E2E69 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		1F3B7C4A17C53B8B000E2E69 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		1F51A0E617CF6A8D00EFC5FE /* AdjustHeadset.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = AdjustHeadset.wav; path = fx/AdjustHeadset.wav; sourceTree = "<group>"; };
 		1F7644AC17CE79AD00C7CAD9 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
 		1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		1F7644B317CE8B3100C7CAD9 /* Error.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Error.wav; path = fx/Error.wav; sourceTree = "<group>"; };
@@ -256,13 +258,8 @@
 		1F3B7BF217C5193A000E2E69 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1F51A0E817CF6A9000EFC5FE /* fx */,
 				1F7644E217CE9C3900C7CAD9 /* Loops */,
-				1F7644BE17CE8F8600C7CAD9 /* Silence.wav */,
-				1F7644B317CE8B3100C7CAD9 /* Error.wav */,
-				1F7644B417CE8B3100C7CAD9 /* Success.wav */,
-				1F7644B717CE8B6F00C7CAD9 /* Tick01.wav */,
-				1F7644B817CE8B6F00C7CAD9 /* Tick02.wav */,
-				1F7644B917CE8B6F00C7CAD9 /* Tick03.wav */,
 				1F7644AE17CE79B100C7CAD9 /* Icon@2x.png */,
 				1F7644AC17CE79AD00C7CAD9 /* Icon.png */,
 				1F3B7C0F17C52E2F000E2E69 /* Signal_Connected.png */,
@@ -290,6 +287,20 @@
 				1F3B7C4217C5395E000E2E69 /* TGAccessoryManager.h */,
 			);
 			path = ThinkGear;
+			sourceTree = "<group>";
+		};
+		1F51A0E817CF6A9000EFC5FE /* fx */ = {
+			isa = PBXGroup;
+			children = (
+				1F7644BE17CE8F8600C7CAD9 /* Silence.wav */,
+				1F7644B317CE8B3100C7CAD9 /* Error.wav */,
+				1F7644B417CE8B3100C7CAD9 /* Success.wav */,
+				1F7644B717CE8B6F00C7CAD9 /* Tick01.wav */,
+				1F7644B817CE8B6F00C7CAD9 /* Tick02.wav */,
+				1F7644B917CE8B6F00C7CAD9 /* Tick03.wav */,
+				1F51A0E617CF6A8D00EFC5FE /* AdjustHeadset.wav */,
+			);
+			name = fx;
 			sourceTree = "<group>";
 		};
 		1F7644E217CE9C3900C7CAD9 /* Loops */ = {
@@ -472,6 +483,7 @@
 				1F7644DF17CE9C3500C7CAD9 /* BrainWave15-Med.wav in Resources */,
 				1F7644E017CE9C3500C7CAD9 /* BRainWave16-Attn.wav in Resources */,
 				1F7644E117CE9C3500C7CAD9 /* BrainWave17-Attn.wav in Resources */,
+				1F51A0E717CF6A8D00EFC5FE /* AdjustHeadset.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,7 +20,7 @@
 @synthesize soundSwitch;
 @synthesize motionManager;
 @synthesize audioController;
-@synthesize successSound, errorSound, reverb; //, blinkSound, shakeSound, ;
+@synthesize successSound, errorSound, adjustHeadsetSound, reverb; //, blinkSound, shakeSound, ;
 
 
 
@@ -42,8 +42,9 @@
     poorSignalValue = 500;
     readings = [NSMutableArray arrayWithObjects: nil];
     events = [NSMutableArray arrayWithObjects: nil];
-    lastReading = [NSDate date];
-    
+    lastRecordedReading = [[NSDate date] dateByAddingTimeInterval:-20];
+    lastDataReceived = [[NSDate date] dateByAddingTimeInterval:-20];
+    SSID = @"None";
    
     
 #pragma mark headerView   
@@ -133,26 +134,18 @@
     errorSound.channelIsPlaying = NO;
     
     
-    [audioController addChannels:[NSArray arrayWithObjects:successSound, errorSound, nil]];
+    NSURL* adjustHeadsetSoundURL = [[NSBundle mainBundle] URLForResource:@"AdjustHeadset" withExtension:@"wav"];
+    adjustHeadsetSound = [AEAudioFilePlayer audioFilePlayerWithURL:adjustHeadsetSoundURL
+                                           audioController:self.audioController
+                                                     error:NULL];
+    adjustHeadsetSound.volume = 0.5;
+    adjustHeadsetSound.channelIsPlaying = NO;
+    adjustHeadsetSound.loop = YES;
     
     
-    /*
-    self.blinkSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Blink"
-                                                                                        withExtension:@"wav"]
-                                                  audioController:self.audioController
-                                                            error:NULL];
-    self.blinkSound.volume = 0.5;
-    self.blinkSound.channelIsPlaying = NO;
-    [self.audioController addChannels:[NSArray arrayWithObject:self.blinkSound]];
     
-    self.shakeSound = [AEAudioFilePlayer audioFilePlayerWithURL:[[NSBundle mainBundle] URLForResource:@"Static"
-                                                                                        withExtension:@"aif"]
-                                                audioController:self.audioController
-                                                          error:NULL];
-    self.shakeSound.loop = YES;
-    self.shakeSound.channelIsPlaying = NO;
-    [self.audioController addChannels:[NSArray arrayWithObject:self.shakeSound]];
-    */
+    [audioController addChannels:[NSArray arrayWithObjects:successSound, errorSound, adjustHeadsetSound, nil]];
+    
     
     
     brainSoundGroup = [audioController createChannelGroup];
@@ -218,29 +211,6 @@
         [meditationLoops addObject:filePlayer];
     }
     
-    /*
-    for(int i=0; i<N_ATTENTION_LOOPS; i++) {
-        NSString* base = [NSString stringWithFormat:@"Att%02d", i+1];
-        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
-        attentionFiles[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
-                                                            audioController:self.audioController
-                                                                      error:NULL];
-        attentionFiles[i].loop = YES;
-        attentionFiles[i].channelIsPlaying = NO;
-    }
-    
-    
-    
-    for(int i=0; i<N_MEDITATION_LOOPS; i++) {
-        NSString* base = [NSString stringWithFormat:@"Med%02d", i+1];
-        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
-        meditationFiles[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
-                                                      audioController:self.audioController
-                                                                error:NULL];
-        meditationFiles[i].loop = YES;
-        meditationFiles[i].channelIsPlaying = NO;
-    }
-     */
     [audioController addChannels:attentionLoops toChannelGroup:brainSoundGroup];
     [audioController addChannels:meditationLoops toChannelGroup:brainSoundGroup];
     
@@ -275,12 +245,12 @@
     
     [audioController addFilter:reverb toChannelGroup:brainSoundGroup];
 
-    
 
 #pragma mark KICK IT OFF!
-
+    
     [self.audioController start:NULL];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(update:) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(slowUpdate:) userInfo:nil repeats:YES];
 }
 
 /*
@@ -340,6 +310,18 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     
 }
 
+
+-(void)slowUpdate:(NSTimer*)t
+{
+    CFArrayRef myArray = CNCopySupportedInterfaces();
+    CFDictionaryRef myDict = CNCopyCurrentNetworkInfo(CFArrayGetValueAtIndex(myArray, 0));
+    NSDictionary *myDictionary = (__bridge_transfer NSDictionary*)myDict;
+    if([myDictionary objectForKey:@"SSID"]!=nil)
+        SSID = [myDictionary objectForKey:@"SSID"];
+    
+    [self reloadSection:SECTION_STATUS];
+}
+
 #define LOOP_FALLOFF 2
 
 - (void) update:(NSTimer*)t
@@ -347,6 +329,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     if(recordButton.selected) {
         interval += [t timeInterval];
     }
+    [self reloadSection:SECTION_RECORDING];
     
     attentionEased += (attention-attentionEased) / 20.0;
     meditationEased += (meditation-meditationEased) / 20.0;
@@ -370,6 +353,21 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         filePlayer.channelIsPlaying = (volume>0);
     }
     
+    BOOL accessoryConnected = [[TGAccessoryManager sharedTGAccessoryManager] accessory] != nil && [[TGAccessoryManager sharedTGAccessoryManager] connected];
+    BOOL receivingData = poorSignalValue < 50 || [[NSDate date] timeIntervalSinceDate:lastDataReceived] < ACCESSORY_TIMEOUT;
+    
+    accessoryActive = accessoryConnected && receivingData;
+
+    
+    if(recordButton.selected) {
+        //NSLog(@"accessoryActive = %@", accessoryActive? @"Yes" : @"No");
+        adjustHeadsetSound.channelIsPlaying = !accessoryActive;
+    } else {
+        recordButton.alpha = (accessoryActive) ? 1 : 0.4;
+        recordButton.enabled = accessoryActive;
+        adjustHeadsetSound.channelIsPlaying = NO;
+    }
+    
     submitButton.alpha = resetButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
     submitButton.enabled = resetButton.enabled = [readings count] > MIN_READINGS;
     
@@ -379,6 +377,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 
     float decay = ofMap(fabs(180/M_PI)*attitude.pitch, 0, 90, 0.001, 20, true);
     AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DecayTimeAt0Hz, kAudioUnitScope_Global, 0, decay, 0);
+    
     
     [self reloadSection:SECTION_DEBUG];
 }
@@ -639,16 +638,14 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 //  This method gets called by the TGAccessoryManager when data is received from the
 //  ThinkGear-enabled device.
 - (void)dataReceived:(NSDictionary *)data {
-    //NSLog(@"dataReceived");
-    if([data valueForKey:@"poorSignal"]) {
+
+    if([data valueForKey:@"poorSignal"])
         poorSignalValue = [[data valueForKey:@"poorSignal"] intValue];
-    }
     
     if([data valueForKey:@"blinkStrength"]) {
         blinkStrength = [[data valueForKey:@"blinkStrength"] intValue];
         if(recordButton.selected)
         {
-            //NSNumber* timestamp = [NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]];
             NSDictionary* message = @{@"eventType": @"blink", @"date":[self isoDate], @"data": @{@"strength": [NSNumber numberWithInt:blinkStrength]}};
             [events addObject:message];
         }
@@ -692,25 +689,31 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         highGamma =   [[data valueForKey:@"eegHighGamma"] intValue];
     
 
-    if(bNewReading && recordButton.selected &&
-       [[NSDate date] timeIntervalSinceDate:lastReading] > [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"])
+    if(bNewReading)
     {
-        ticks[2].volume = 0.1;
-        ticks[2].currentTime = 0;
-        ticks[2].channelIsPlaying = YES;
-        NSDictionary* reading = @{@"date":[self isoDate], @"data": @{@"attention": [NSNumber numberWithInt:attention],
-                                                            @"meditation": [NSNumber numberWithInt:meditation]}};
-        [readings addObject:reading];
-        if([readings count]>MAX_READINGS) {
-            //TO DO:  do something!  stop recording?  [readings removeObjectAtIndex:0]?
+        lastDataReceived = [NSDate date];
+        BOOL timeForNewRecording =
+            [[NSDate date] timeIntervalSinceDate:lastRecordedReading] >
+            [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"];
+        if(recordButton.selected && timeForNewRecording) {
+            ticks[2].volume = 0.1;
+            ticks[2].currentTime = 0;
+            ticks[2].channelIsPlaying = YES;
+            NSDictionary* reading = @{@"date":[self isoDate], @"data": @{@"attention": [NSNumber numberWithInt:attention],
+                                                                         @"meditation": [NSNumber numberWithInt:meditation]}};
+            [readings addObject:reading];
+            if([readings count]>MAX_READINGS) {
+                //TO DO:  do something!  stop recording?  [readings removeObjectAtIndex:0]?
+            }
+            //NSError *error;
+            //NSLog(@"%@", [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:reading options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding]);
+            
+            lastRecordedReading = [NSDate date];
+            [self reloadSection:SECTION_RECORDING];
         }
-        //NSError *error;
-        //NSLog(@"%@", [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:reading options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding]);
-
-        lastReading = [NSDate date];        
     }
+        
     
-    [self reloadSection:SECTION_STATUS];
     [self reloadSection: SECTION_THINKGEAR];
 }
 
@@ -811,12 +814,13 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 5;
+    return 6;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     switch(section) {
+        case SECTION_RECORDING: return @"Recording";
         case SECTION_CONTROLS: return @"Controls";
         case SECTION_STATUS: return @"Status";
         case SECTION_THINKGEAR: return @"Brain Activity";
@@ -842,11 +846,12 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 {
     // Return the number of rows in the section.
     switch(section) {
+        case SECTION_RECORDING: return 2;
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 4;
+        case SECTION_STATUS: return 3;
         case SECTION_THINKGEAR: return 11;
         case SECTION_MOTION: return 5;
-        case SECTION_DEBUG: return 4;
+        case SECTION_DEBUG: return 5;
         default: return 4;
     }    
 }
@@ -866,6 +871,26 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     // Configure the cell...
     switch(indexPath.section) {
             
+        
+        case SECTION_RECORDING:
+            switch(indexPath.row) {
+                case 0:
+                    [[cell textLabel] setText:@"Record Time"];
+                    
+                    NSInteger ti = (NSInteger)interval;
+                    NSInteger seconds = ti % 60;
+                    NSInteger minutes = (ti / 60) % 60;
+                    NSInteger hours = (ti / 3600);
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds]];
+                    break;
+                    
+                case 1:
+                    [[cell textLabel] setText:@"Readings"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", [readings count]]];
+                    break;
+            }
+            break;
+        
         case SECTION_CONTROLS:
             cell.textLabel.text = @"Sound";
             cell.accessoryView = soundSwitch;
@@ -896,39 +921,12 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     break;
 
                 case 1:
-                    [[cell textLabel] setText:@"Record Time"];
-                    
-                    NSInteger ti = (NSInteger)interval;
-                    NSInteger seconds = ti % 60;
-                    NSInteger minutes = (ti / 60) % 60;
-                    NSInteger hours = (ti / 3600);
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds]];
-                    break;
-                    
-                case 2:
-                    [[cell textLabel] setText:@"Readings"];
-                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%d", [readings count]]];
-                    break;
-
-                    /*
-                     case 1:
-                     [[cell textLabel] setText:@"Websocket"];
-                     switch(webSocketStatus) {
-                     case SOCKET_STATUS_CLOSED:
-                     [[cell detailTextLabel] setText:@"Closed"];
-                     break;
-                     case SOCKET_STATUS_CONNECTING:
-                     [[cell detailTextLabel] setText:@"Connecting"];
-                     break;
-                     case SOCKET_STATUS_OPEN:
-                     [[cell detailTextLabel] setText:@"Open"];
-                     break;
-                     }
-                     break;
-                     */
-                case 3:
                     [[cell textLabel] setText:@"Device Name"];
                     [[cell detailTextLabel] setText:[[UIDevice currentDevice] name]];
+                    break;
+                case 2:
+                    [[cell textLabel] setText:@"WiFi Network"];
+                    [[cell detailTextLabel] setText:SSID];
                     break;
             }
             break;
@@ -951,6 +949,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                 case 3:
                     [[cell textLabel] setText:@"Attention Teir"];
                     [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", attentionTeir]];
+                    break;
+                case 4:
+                    [[cell textLabel] setText:@"Time Since Last Data"];
+                    [[cell detailTextLabel] setText:[NSString stringWithFormat:@"%.2f", [[NSDate date] timeIntervalSinceDate:lastDataReceived]]];
                     break;
             }
             break;

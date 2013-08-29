@@ -13,12 +13,14 @@
 #import "TGAccessoryManager.h"
 #import "TheAmazingAudioEngine.h"
 #import "ASIHTTPRequest.h"
+#import <SystemConfiguration/CaptiveNetwork.h>
 
-#define SECTION_CONTROLS 0
-#define SECTION_STATUS 1
-#define SECTION_DEBUG 2
-#define SECTION_THINKGEAR 3
-#define SECTION_MOTION 4
+#define SECTION_RECORDING 0
+#define SECTION_CONTROLS 1
+#define SECTION_STATUS 2
+#define SECTION_DEBUG 3
+#define SECTION_THINKGEAR 4
+#define SECTION_MOTION 5
 
 
 #define ALERT_TAG_ERROR 101
@@ -30,7 +32,7 @@
 
 #define MIN_READINGS 30
 #define MAX_READINGS 64*64
-
+#define ACCESSORY_TIMEOUT 5
 
 @interface ViewController : UITableViewController <TGAccessoryDelegate> { //SRWebSocketDelegate
     
@@ -53,6 +55,8 @@
     float attentionTeir;
     float meditationTeir;
     
+    BOOL accessoryActive;
+    
     // Other stuff
     //int webSocketStatus;
     //SRWebSocket *webSocket;
@@ -68,7 +72,9 @@
     //AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
     //AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
     AEAudioFilePlayer* ticks[3];
-    NSDate* lastReading;
+    NSDate* lastRecordedReading;
+    NSDate* lastDataReceived;
+    NSString* SSID;
 }
 
 // SocketRocket
@@ -86,6 +92,7 @@
 
 @property (nonatomic, retain) AEAudioFilePlayer *successSound;
 @property (nonatomic, retain) AEAudioFilePlayer *errorSound;
+@property (nonatomic, retain) AEAudioFilePlayer *adjustHeadsetSound;
 //@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
 //@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
 @property (nonatomic, retain) AEAudioUnitFilter *reverb;
