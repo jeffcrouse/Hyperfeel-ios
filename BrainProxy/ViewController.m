@@ -503,6 +503,11 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     if(alertView.tag==ALERT_TAG_SUBMIT) // SubmitJourney
     {
         NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
+        
+        [soundSwitch setOn:NO animated:YES];
+        [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+        
+        
         //NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
         NSString* email = [[alertView textFieldAtIndex:0] text];
         NSDictionary* data = @{@"client_id": [[UIDevice currentDevice] name],
@@ -855,7 +860,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     switch(section) {
         case SECTION_RECORDING: return 2;
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 4;
+        case SECTION_STATUS: return 5;
         case SECTION_THINKGEAR: return 11;
         case SECTION_MOTION: return 5;
         case SECTION_DEBUG: return 5;
@@ -937,6 +942,11 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                 case 3:
                     [[cell textLabel] setText:@"Connectivity"];
                     [[cell detailTextLabel] setText:connectivityStatus];
+                    break;
+                case 4:
+                    [[cell textLabel] setText:@"Server"];
+                    [[cell detailTextLabel] setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"server"]];
+                    
                     break;
             }
             break;
