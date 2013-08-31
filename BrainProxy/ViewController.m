@@ -16,11 +16,17 @@
 
 @implementation ViewController
 
-@synthesize recordButton, submitButton, resetButton;
+@synthesize recordButton;
+@synthesize doneButton;
+@synthesize buttonSound;
+@synthesize tickSound;
 @synthesize soundSwitch;
 @synthesize motionManager;
 @synthesize audioController;
-@synthesize successSound, errorSound, adjustHeadsetSound, reverb; //, blinkSound, shakeSound, ;
+@synthesize successSound;
+@synthesize errorSound;
+@synthesize adjustHeadsetSound;
+@synthesize reverb;
 
 
 
@@ -33,10 +39,12 @@
     return self;
 }
 
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     NSLog(@"currentDevice name = %@", [[UIDevice currentDevice] name]);
+    
 #pragma mark Init vars
 
     poorSignalValue = 500;
@@ -46,34 +54,39 @@
     lastDataReceived = [[NSDate date] dateByAddingTimeInterval:-20];
     SSID = @"None";
     connectivityStatus = @"Unknown";
+
     
 #pragma mark headerView   
 
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 100)];
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 80)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     
-    float x = 20;
+    float x = 10;
     float y = 10;
-    float width = ((headerView.bounds.size.width-50) / 2);
+    float width = ((headerView.bounds.size.width-40) / 2);
     float height = headerView.bounds.size.height - 20;
     
     self.recordButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [recordButton setTitle:@"Record" forState:UIControlStateNormal];
     [recordButton setTitle:@"Stop" forState:UIControlStateSelected];
-    [recordButton addTarget:self action:@selector(record:) forControlEvents:UIControlEventTouchUpInside];
+    [recordButton addTarget:self action:@selector(toggleRecord:) forControlEvents:UIControlEventTouchUpInside];
     recordButton.frame = CGRectMake(x, y, width, height);
     recordButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
     recordButton.selected = NO;
+    [headerView addSubview:recordButton];
     
+  
     x = CGRectGetMaxX(recordButton.frame)+10;
-    height = (headerView.bounds.size.height - 20) * 0.6;
+    //height = (headerView.bounds.size.height - 20) * 0.6;
     
-    self.submitButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [submitButton setTitle:@"Submit" forState:UIControlStateNormal];
-    [submitButton addTarget:self action:@selector(submitJourney:) forControlEvents:UIControlEventTouchUpInside];
-    submitButton.frame = CGRectMake(x, y, width, height);
-    submitButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    self.doneButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [doneButton setTitle:@"Done" forState:UIControlStateNormal];
+    [doneButton addTarget:self action:@selector(done:) forControlEvents:UIControlEventTouchUpInside];
+    doneButton.frame = CGRectMake(x, y, width, height);
+    doneButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    [headerView addSubview:doneButton];
     
+      /*
     y += (headerView.bounds.size.height - 20) * 0.7;
     height = (headerView.bounds.size.height - 20) * 0.3;
     
@@ -82,11 +95,9 @@
     [resetButton addTarget:self action:@selector(resetJourney:) forControlEvents:UIControlEventTouchUpInside];
     resetButton.frame = CGRectMake(x, y, width, height);
     resetButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
-    
-    
-    [headerView addSubview:recordButton];
-    [headerView addSubview:submitButton];
     [headerView addSubview:resetButton];
+    */
+    
     self.tableView.tableHeaderView = headerView;
 
     
@@ -133,6 +144,21 @@
     errorSound.volume = 0.5;
     errorSound.channelIsPlaying = NO;
     
+    NSURL* buttonSoundURL = [[NSBundle mainBundle] URLForResource:@"Button" withExtension:@"wav"];
+    buttonSound = [AEAudioFilePlayer audioFilePlayerWithURL:buttonSoundURL
+                                           audioController:self.audioController
+                                                     error:NULL];
+    buttonSound.volume = 0.5;
+    buttonSound.channelIsPlaying = NO;
+    
+    
+    NSURL* tickSoundURL = [[NSBundle mainBundle] URLForResource:@"Tick" withExtension:@"wav"];
+    tickSound = [AEAudioFilePlayer audioFilePlayerWithURL:tickSoundURL
+                                            audioController:self.audioController
+                                                      error:NULL];
+    tickSound.volume = 0.5;
+    tickSound.channelIsPlaying = NO;
+    
     
     NSURL* adjustHeadsetSoundURL = [[NSBundle mainBundle] URLForResource:@"AdjustHeadset" withExtension:@"wav"];
     adjustHeadsetSound = [AEAudioFilePlayer audioFilePlayerWithURL:adjustHeadsetSoundURL
@@ -144,15 +170,12 @@
     
     
     
-    [audioController addChannels:[NSArray arrayWithObjects:successSound, errorSound, adjustHeadsetSound, nil]];
+    [audioController addChannels:[NSArray arrayWithObjects:successSound, errorSound, buttonSound, tickSound, adjustHeadsetSound, nil]];
     
     
     
     brainSoundGroup = [audioController createChannelGroup];
     [audioController setMuted:YES forChannelGroup:brainSoundGroup];
-    
-    
-    
         
     NSArray* attentionSounds = @[@"Silence",
                                 @"BrainWave03-Attn",
@@ -214,22 +237,7 @@
     [audioController addChannels:attentionLoops toChannelGroup:brainSoundGroup];
     [audioController addChannels:meditationLoops toChannelGroup:brainSoundGroup];
     
-    
-    //
-    // TICKS
-    //
-    for(int i=0; i<3; i++) {
-        NSString* base = [NSString stringWithFormat:@"Tick%02d", i+1];
-        NSURL* url = [[NSBundle mainBundle] URLForResource:base withExtension:@"wav"];
-        ticks[i] = [AEAudioFilePlayer audioFilePlayerWithURL:url
-                                             audioController:self.audioController
-                                                       error:NULL];
-        ticks[i].volume = 0.1;
-        ticks[i].channelIsPlaying = NO;
-    }
-    [self.audioController addChannels:[NSArray arrayWithObjects:ticks count:3]];
-    
-    
+ 
     //
     //  REVERB!
     //
@@ -251,7 +259,9 @@
     [self.audioController start:NULL];
     [NSTimer scheduledTimerWithTimeInterval:8 target:self selector:@selector(connectivityCheck:) userInfo:nil repeats:YES];
     [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(update:) userInfo:nil repeats:YES];
+#if !(TARGET_IPHONE_SIMULATOR)
     [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(slowUpdate:) userInfo:nil repeats:YES];
+#endif
 }
 
 
@@ -291,8 +301,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 	}
 }
 
-
-
 #pragma mark - NSTimer 
 
 -(void)connectivityCheck:(NSTimer*)t
@@ -301,7 +309,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/ping", [[NSUserDefaults standardUserDefaults] stringForKey:@"server"]]];
     // __block   ... removed??
-    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
 
     [request setCompletionBlock:^{
         connectivityStatus = [request responseString];
@@ -314,8 +322,10 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     [self reloadSection:SECTION_STATUS];
 }
 
+
 -(void)slowUpdate:(NSTimer*)t
 {
+#if !(TARGET_IPHONE_SIMULATOR)
     CFArrayRef myArray = CNCopySupportedInterfaces();
     CFDictionaryRef myDict = CNCopyCurrentNetworkInfo(CFArrayGetValueAtIndex(myArray, 0));
     NSDictionary *myDictionary = (__bridge_transfer NSDictionary*)myDict;
@@ -323,6 +333,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         SSID = [myDictionary objectForKey:@"SSID"];
     
     [self reloadSection:SECTION_STATUS];
+#endif
 }
 
 
@@ -342,18 +353,16 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     AEAudioFilePlayer* filePlayer;
     for(int i=0; i<[attentionLoops count]; i++) {
         float dist = fabs(attentionTeir - i);
-        float volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
         filePlayer = [attentionLoops objectAtIndex:i];
-        filePlayer.volume = volume;
-        filePlayer.channelIsPlaying = (volume>0);
+        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer.channelIsPlaying = (filePlayer.volume>0);
     }
     
     for(int i=0; i<[meditationLoops count]; i++) {
         float dist = fabs(meditationTeir - i);
-        float volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
         filePlayer = [meditationLoops objectAtIndex:i];
-        filePlayer.volume = volume;
-        filePlayer.channelIsPlaying = (volume>0);
+        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer.channelIsPlaying = (filePlayer.volume>0);
     }
     
     BOOL accessoryConnected = [[TGAccessoryManager sharedTGAccessoryManager] accessory] != nil && [[TGAccessoryManager sharedTGAccessoryManager] connected];
@@ -371,8 +380,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         adjustHeadsetSound.channelIsPlaying = NO;
     }
     
-    submitButton.alpha = resetButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
-    submitButton.enabled = resetButton.enabled = [readings count] > MIN_READINGS;
+    doneButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
+    doneButton.enabled = [readings count] > MIN_READINGS;
     
     float avg = (fabs(userAcceleration.x) + fabs(userAcceleration.y) + fabs(userAcceleration.z)) / 3.0;
     float mix = ofMap(avg, 0, 3, 0, 100, true);
@@ -419,43 +428,103 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 */
 #pragma mark - Action Buttons
 
-- (void)record:(id)sender
+- (void)toggleRecord:(id)sender
 {
-    if(recordButton.selected) {
-        recordButton.selected = NO;
-        
-        ticks[0].currentTime = 0;
-        ticks[0].volume = 0.25;
-        ticks[0].channelIsPlaying = YES;
-    } else {
-        recordButton.selected = YES;
-        
-        ticks[1].currentTime = 0;
-        ticks[1].volume = 0.25;
-        ticks[1].channelIsPlaying = YES;
-    }
+    recordButton.selected = !recordButton.selected;
+    buttonSound.currentTime = 0;
+    buttonSound.channelIsPlaying = YES;
 }
 
 
-- (void)submitJourney:(id)sender
+- (void)done:(id)sender
 {
-    NSLog(@"submitJourney");
+    NSLog(@"done");
+    buttonSound.currentTime = 0;
+    buttonSound.channelIsPlaying = YES;
+    
     UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"email"
                                                      message:@"Please enter your email address (optional):"
                                                     delegate:self
-                                           cancelButtonTitle:@"Continue"
-                                           otherButtonTitles:nil];
+                                           cancelButtonTitle:@"Cancel"
+                                           otherButtonTitles:@"Submit", nil];
     alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-    alert.tag = ALERT_TAG_SUBMIT;
+    alert.tag = ALERT_TAG_DONE;
     
     UITextField * alertTextField = [alert textFieldAtIndex:0];
     alertTextField.keyboardType = UIKeyboardTypeEmailAddress;
+    alertTextField.autocorrectionType = UITextAutocapitalizationTypeNone;
     alertTextField.placeholder = @"you@email.com";
     [alert show];
     
     recordButton.selected = NO;
 }
 
+- (void)submitJourney:(NSString*)email
+{
+    //NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
+    NSDictionary* data = @{@"client_id": [[UIDevice currentDevice] name],
+                           @"route": @"submit",
+                           @"date": [self isoDate], //[NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]],
+                           @"email": email,
+                           @"readings": readings,
+                           @"events": events};
+    
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
+    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    NSLog(@"Journey: %@", jsonString);
+    
+    
+    NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/submit/journey", [[NSUserDefaults standardUserDefaults] stringForKey:@"server"]]];
+    // __block   ... removed??
+    __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+    [request addRequestHeader:@"Content-Type" value:@"application/json"];
+    [request appendPostData:jsonData];
+    [request setCompletionBlock:^{
+        
+        NSError *jsonError = nil;
+        NSData* data = [[request responseString] dataUsingEncoding:NSUTF8StringEncoding];
+        id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
+        if ([jsonObject isKindOfClass:[NSArray class]]) {
+            //NSArray *jsonArray = (NSArray *)jsonObject;
+            // do something with the array?
+        }
+        else {
+            NSDictionary *dict = (NSDictionary *)jsonObject;
+            NSString* status = [dict valueForKey:@"status"];
+            NSLog(@"status = %@", status);
+            if([status isEqualToString:@"OK"]) {
+                
+                self.successSound.currentTime = 0;
+                self.successSound.channelIsPlaying = YES;
+                [readings removeAllObjects];
+                interval = 0;
+                
+            } else {
+                self.errorSound.currentTime = 0;
+                self.errorSound.channelIsPlaying = YES;
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                message:[dict valueForKey:@"status"]
+                                                               delegate:self
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles: nil];
+                alert.tag = ALERT_TAG_ERROR;
+                [alert show];
+            }
+        }
+    }];
+    [request setFailedBlock:^{
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[[request error] localizedDescription]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        alert.tag = ALERT_TAG_ERROR;
+        [alert show];
+    }];
+    [request startAsynchronous];
+}
+
+
+
+/*
 - (void)resetJourney:(id)sender
 {
     NSLog(@"resetJourney");
@@ -468,8 +537,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                                           otherButtonTitles:@"OK", nil ];
     alert.tag = ALERT_TAG_RESET;
     [alert show];
-
 }
+*/
+
 
 - (void)toggleSound:(UISwitch*)sender
 {
@@ -484,92 +554,35 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 
 #pragma mark - AlertView delagate
 
-
-
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
     
+    /*
     if(alertView.tag==ALERT_TAG_RESET && buttonIndex==1)
     {
         [readings removeAllObjects];
         [events removeAllObjects];
         interval = 0;
     }
-    
+    */
     if(alertView.tag==ALERT_TAG_ERROR)
     {
         
     }
     
-    if(alertView.tag==ALERT_TAG_SUBMIT) // SubmitJourney
+    if(alertView.tag==ALERT_TAG_DONE)
     {
-        NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
-        
-        [soundSwitch setOn:NO animated:YES];
-        [audioController setMuted:YES forChannelGroup:brainSoundGroup];
-        
-        
-        //NSNumber* client_id = [NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"client_id"]];
-        NSString* email = [[alertView textFieldAtIndex:0] text];
-        NSDictionary* data = @{@"client_id": [[UIDevice currentDevice] name],
-                               @"route": @"submit",
-                               @"date": [self isoDate], //[NSNumber numberWithLong:[[NSDate date] timeIntervalSince1970]],
-                               @"email": email,
-                               @"readings": readings,
-                               @"events": events};
-        
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&error];
-        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        NSLog(@"Journey: %@", jsonString);
-  
-
-        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/submit/journey", [[NSUserDefaults standardUserDefaults] stringForKey:@"server"]]];
-        // __block   ... removed??
-        ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-        [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
-        [request addRequestHeader:@"Content-Type" value:@"application/json"];
-        [request appendPostData:jsonData];
-        [request setCompletionBlock:^{
-
-            NSError *jsonError = nil;
-            NSData* data = [[request responseString] dataUsingEncoding:NSUTF8StringEncoding];
-            id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&jsonError];
-            if ([jsonObject isKindOfClass:[NSArray class]]) {
-                //NSArray *jsonArray = (NSArray *)jsonObject;
-                // do something with the array?
-            }
-            else {
-                NSDictionary *dict = (NSDictionary *)jsonObject;
-                NSString* status = [dict valueForKey:@"status"];
-                NSLog(@"status = %@", status);
-                if([status isEqualToString:@"OK"]) {
-
-                    self.successSound.currentTime = 0;
-                    self.successSound.channelIsPlaying = YES;
-                    [readings removeAllObjects];
-                    interval = 0;
-                    
-                } else {
-                    
-                    self.errorSound.currentTime = 0;
-                    self.errorSound.channelIsPlaying = YES;
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                                    message:[dict valueForKey:@"status"]
-                                                                   delegate:self
-                                                          cancelButtonTitle:@"OK"
-                                                          otherButtonTitles: nil];
-                    alert.tag = ALERT_TAG_ERROR;
-                    [alert show];
-                }
- 
-            }
-        }];
-        [request setFailedBlock:^{
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[[request error] localizedDescription]  delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
-            alert.tag = ALERT_TAG_ERROR;
-            [alert show];
-        }];
-        [request startAsynchronous];
+        if(buttonIndex==0)
+        {
+            
+        }
+        else if(buttonIndex==1)
+        {
+             NSLog(@"Entered: %@", [[alertView textFieldAtIndex:0] text]);
+            
+            [soundSwitch setOn:NO animated:YES];
+            [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+            [self submitJourney:[[alertView textFieldAtIndex:0] text]];
+        }
     }
 }
 
@@ -591,6 +604,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             
             NSDictionary* event = @{@"eventType": @"shake", @"date":[self isoDate], @"data": data};
             [events addObject:event];
+            if([events count] > MAX_READINGS) {
+                [events removeObjectAtIndex:0];
+            }
         }
     }
 }
@@ -708,9 +724,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             [[NSDate date] timeIntervalSinceDate:lastRecordedReading] >
             [[NSUserDefaults standardUserDefaults] floatForKey:@"sample_rate"];
         if(recordButton.selected && timeForNewRecording) {
-            ticks[2].volume = 0.1;
-            ticks[2].currentTime = 0;
-            ticks[2].channelIsPlaying = YES;
+            tickSound.volume = 0.1;
+            tickSound.currentTime = 0;
+            tickSound.channelIsPlaying = YES;
             NSDictionary* reading = @{@"date":[self isoDate], @"data": @{@"attention": [NSNumber numberWithInt:attention],
                                                                          @"meditation": [NSNumber numberWithInt:meditation]}};
             [readings addObject:reading];

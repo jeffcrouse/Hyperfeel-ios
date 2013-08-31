@@ -14,6 +14,12 @@
 #import "TheAmazingAudioEngine.h"
 #import "ASIHTTPRequest.h"
 #import <SystemConfiguration/CaptiveNetwork.h>
+#include "TargetConditionals.h"
+
+#define QUOTE(__text__) #__text__
+#define TODO(__text__) _Pragma(QUOTE(message("TODO: "__text__)))
+#define FIXME(__text__) _Pragma(QUOTE(message("FIXME: "__text__)))
+
 
 #define SECTION_RECORDING 0
 #define SECTION_CONTROLS 1
@@ -23,9 +29,8 @@
 #define SECTION_MOTION 5
 
 
-#define ALERT_TAG_ERROR 101
-#define ALERT_TAG_SUBMIT 100
-#define ALERT_TAG_RESET 102
+#define ALERT_TAG_ERROR 100
+#define ALERT_TAG_DONE 101
 
 #define LOOP_FALLOFF 2
 
@@ -70,7 +75,7 @@
     NSMutableArray* meditationLoops;
     //AEAudioFilePlayer* attentionFiles[N_ATTENTION_LOOPS];
     //AEAudioFilePlayer* meditationFiles[N_MEDITATION_LOOPS];
-    AEAudioFilePlayer* ticks[3];
+    //AEAudioFilePlayer* ticks[3];
     NSDate* lastRecordedReading;
     NSDate* lastDataReceived;
     NSString* SSID;
@@ -86,13 +91,16 @@
 @property (retain, nonatomic) AEAudioController *audioController;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (nonatomic, retain) UIButton *recordButton;
-@property (nonatomic, retain) UIButton *submitButton;
-@property (nonatomic, retain) UIButton *resetButton;
+@property (nonatomic, retain) UIButton *doneButton;
+//@property (nonatomic, retain) UIButton *resetButton;
 @property (nonatomic, retain) UISwitch *soundSwitch;
 
 @property (nonatomic, retain) AEAudioFilePlayer *successSound;
 @property (nonatomic, retain) AEAudioFilePlayer *errorSound;
+@property (nonatomic, retain) AEAudioFilePlayer *buttonSound;
+@property (nonatomic, retain) AEAudioFilePlayer *tickSound;
 @property (nonatomic, retain) AEAudioFilePlayer *adjustHeadsetSound;
+
 //@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
 //@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
 @property (nonatomic, retain) AEAudioUnitFilter *reverb;
