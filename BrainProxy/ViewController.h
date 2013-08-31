@@ -26,11 +26,12 @@
 #define SECTION_STATUS 2
 #define SECTION_DEBUG 3
 #define SECTION_THINKGEAR 4
-#define SECTION_MOTION 5
+//#define SECTION_MOTION 5
 
 
 #define ALERT_TAG_ERROR 100
 #define ALERT_TAG_DONE 101
+#define ALERT_TAG_RESET 102
 
 #define LOOP_FALLOFF 2
 
@@ -92,7 +93,7 @@
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (nonatomic, retain) UIButton *recordButton;
 @property (nonatomic, retain) UIButton *doneButton;
-//@property (nonatomic, retain) UIButton *resetButton;
+@property (nonatomic, retain) UIButton *resetButton;
 @property (nonatomic, retain) UISwitch *soundSwitch;
 
 @property (nonatomic, retain) AEAudioFilePlayer *successSound;

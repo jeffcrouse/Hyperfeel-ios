@@ -18,6 +18,7 @@
 
 @synthesize recordButton;
 @synthesize doneButton;
+@synthesize resetButton;
 @synthesize buttonSound;
 @synthesize tickSound;
 @synthesize soundSwitch;
@@ -63,7 +64,7 @@
     
     float x = 10;
     float y = 10;
-    float width = ((headerView.bounds.size.width-40) / 2);
+    float width = ((headerView.bounds.size.width-30) / 2);
     float height = headerView.bounds.size.height - 20;
     
     self.recordButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
@@ -90,16 +91,24 @@
     y += (headerView.bounds.size.height - 20) * 0.7;
     height = (headerView.bounds.size.height - 20) * 0.3;
     
-    self.resetButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [resetButton setTitle:@"Reset" forState:UIControlStateNormal];
-    [resetButton addTarget:self action:@selector(resetJourney:) forControlEvents:UIControlEventTouchUpInside];
-    resetButton.frame = CGRectMake(x, y, width, height);
-    resetButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
-    [headerView addSubview:resetButton];
-    */
+        */
     
     self.tableView.tableHeaderView = headerView;
 
+    
+#pragma mark footerView
+    
+    UIView *footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 80)];
+    footerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    self.resetButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [resetButton setTitle:@"Reset" forState:UIControlStateNormal];
+    [resetButton addTarget:self action:@selector(resetJourney:) forControlEvents:UIControlEventTouchUpInside];
+    resetButton.frame = CGRectMake(10, 10, footerView.bounds.size.width-20, 40);
+    resetButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+    [footerView addSubview:resetButton];
+
+    self.tableView.tableFooterView = footerView;
     
 #pragma mark soundSwitch
 
@@ -119,7 +128,7 @@
                                                 attitude = [motion attitude];
                                                 rotationRate = [motion rotationRate];
                                                 userAcceleration = [motion userAcceleration];
-                                                [self reloadSection: SECTION_MOTION];
+                                                //[self reloadSection: SECTION_MOTION];
                                             }];
     
     
@@ -524,7 +533,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 
 
 
-/*
 - (void)resetJourney:(id)sender
 {
     NSLog(@"resetJourney");
@@ -538,7 +546,6 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     alert.tag = ALERT_TAG_RESET;
     [alert show];
 }
-*/
 
 
 - (void)toggleSound:(UISwitch*)sender
@@ -556,14 +563,13 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
     
-    /*
     if(alertView.tag==ALERT_TAG_RESET && buttonIndex==1)
     {
         [readings removeAllObjects];
         [events removeAllObjects];
         interval = 0;
     }
-    */
+
     if(alertView.tag==ALERT_TAG_ERROR)
     {
         
@@ -842,7 +848,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 6;
+    return 5;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -852,8 +858,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         case SECTION_CONTROLS: return @"Controls";
         case SECTION_STATUS: return @"Status";
         case SECTION_THINKGEAR: return @"Brain Activity";
-        case SECTION_MOTION: return @"Motion";
         case SECTION_DEBUG: return @"Debug";
+        //case SECTION_MOTION: return @"Motion";
         default:
             return [NSString stringWithFormat:@"Section %d", section];
     }
@@ -878,8 +884,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         case SECTION_CONTROLS: return 1;
         case SECTION_STATUS: return 5;
         case SECTION_THINKGEAR: return 11;
-        case SECTION_MOTION: return 5;
         case SECTION_DEBUG: return 5;
+        //case SECTION_MOTION: return 5;
         default: return 4;
     }    
 }
@@ -1042,7 +1048,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     break;
             }
             break;
-            
+        /*
         case SECTION_MOTION:
             switch (indexPath.row) {
                 case 0:
@@ -1074,6 +1080,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     break;
             }
             break;
+        */
         default:
             [[cell textLabel] setText:CellIdentifier];
             break;
