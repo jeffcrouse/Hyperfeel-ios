@@ -27,7 +27,7 @@
 @synthesize successSound;
 @synthesize errorSound;
 @synthesize adjustHeadsetSound;
-@synthesize reverb;
+//@synthesize reverb;
 
 
 
@@ -59,17 +59,20 @@
     
 #pragma mark headerView   
 
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 80)];
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 70)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     
     float x = 10;
     float y = 10;
     float width = ((headerView.bounds.size.width-30) / 2);
-    float height = headerView.bounds.size.height - 20;
+    float height = headerView.bounds.size.height - 10;
     
     self.recordButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    //[recordButton setBackgroundColor:[UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0]];
+    //[recordButton setTintColor:[UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0]];
+    [recordButton setTitleColor:[UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0] forState:UIControlStateNormal];
     [recordButton setTitle:@"Record" forState:UIControlStateNormal];
-    [recordButton setTitle:@"Stop" forState:UIControlStateSelected];
+    [recordButton setTitle:@"Pause" forState:UIControlStateSelected];
     [recordButton addTarget:self action:@selector(toggleRecord:) forControlEvents:UIControlEventTouchUpInside];
     recordButton.frame = CGRectMake(x, y, width, height);
     recordButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
@@ -81,6 +84,7 @@
     //height = (headerView.bounds.size.height - 20) * 0.6;
     
     self.doneButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [doneButton setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.0 alpha:1.0] forState:UIControlStateNormal];
     [doneButton setTitle:@"Done" forState:UIControlStateNormal];
     [doneButton addTarget:self action:@selector(done:) forControlEvents:UIControlEventTouchUpInside];
     doneButton.frame = CGRectMake(x, y, width, height);
@@ -157,7 +161,7 @@
     buttonSound = [AEAudioFilePlayer audioFilePlayerWithURL:buttonSoundURL
                                            audioController:self.audioController
                                                      error:NULL];
-    buttonSound.volume = 0.5;
+    //buttonSound.volume = 0.5;
     buttonSound.channelIsPlaying = NO;
     
     
@@ -165,7 +169,7 @@
     tickSound = [AEAudioFilePlayer audioFilePlayerWithURL:tickSoundURL
                                             audioController:self.audioController
                                                       error:NULL];
-    tickSound.volume = 0.5;
+    //tickSound.volume = 0.5;
     tickSound.channelIsPlaying = NO;
     
     
@@ -190,8 +194,9 @@
                                 @"BrainWave03-Attn",
                                 @"BrainWave06-Attn",
                                 @"Silence",
-                                @"BRainWave16-Attn",
-                                @"BrainWave07-Attn",
+                                @"BrainWave16-Attn",
+                                //@"BrainWave07-Attn",
+                                @"Silence",
                                 @"BrainWave10-Attn",
                                 @"Silence",
                                 @"BrainWave09-Attn",
@@ -250,6 +255,7 @@
     //
     //  REVERB!
     //
+    /*
     AudioComponentDescription component  = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
                                                                            kAudioUnitType_Effect,
                                                                            kAudioUnitSubType_Reverb2);
@@ -261,7 +267,7 @@
     
     
     [audioController addFilter:reverb toChannelGroup:brainSoundGroup];
-
+    */
 
 #pragma mark KICK IT OFF!
     
@@ -340,7 +346,8 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     NSDictionary *myDictionary = (__bridge_transfer NSDictionary*)myDict;
     if([myDictionary objectForKey:@"SSID"]!=nil)
         SSID = [myDictionary objectForKey:@"SSID"];
-    
+    else
+        SSID = @"None";
     [self reloadSection:SECTION_STATUS];
 #endif
 }
@@ -359,18 +366,20 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     attentionTeir = ofMap(attentionEased, 0, 100, 0, [attentionLoops count], true);
     meditationTeir = ofMap(meditationEased, 0, 100, 0, [meditationLoops count], true);
     
+    float max_volume = 1;
+    
     AEAudioFilePlayer* filePlayer;
     for(int i=0; i<[attentionLoops count]; i++) {
         float dist = fabs(attentionTeir - i);
         filePlayer = [attentionLoops objectAtIndex:i];
-        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, max_volume, 0, true);
         filePlayer.channelIsPlaying = (filePlayer.volume>0);
     }
     
     for(int i=0; i<[meditationLoops count]; i++) {
         float dist = fabs(meditationTeir - i);
         filePlayer = [meditationLoops objectAtIndex:i];
-        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, 0.25, 0, true);
+        filePlayer.volume = ofMap(dist, 0, LOOP_FALLOFF, max_volume, 0, true);
         filePlayer.channelIsPlaying = (filePlayer.volume>0);
     }
     
@@ -392,15 +401,16 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     doneButton.alpha = [readings count] > MIN_READINGS ? 1 : 0.4;
     doneButton.enabled = [readings count] > MIN_READINGS;
     
+    /*
     float avg = (fabs(userAcceleration.x) + fabs(userAcceleration.y) + fabs(userAcceleration.z)) / 3.0;
     float mix = ofMap(avg, 0, 3, 0, 100, true);
     AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DryWetMix, kAudioUnitScope_Global, 0, mix, 0);
 
     float decay = ofMap(fabs(180/M_PI)*attitude.pitch, 0, 90, 0.001, 20, true);
     AudioUnitSetParameter(reverb.audioUnit, kReverb2Param_DecayTimeAt0Hz, kAudioUnitScope_Global, 0, decay, 0);
+    */
     
-    
-    [self reloadSection:SECTION_DEBUG];
+    //[self reloadSection:SECTION_DEBUG];
 }
 
 
@@ -442,6 +452,13 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     recordButton.selected = !recordButton.selected;
     buttonSound.currentTime = 0;
     buttonSound.channelIsPlaying = YES;
+    if(recordButton.selected) {
+        [soundSwitch setOn:YES animated:YES];
+        [audioController setMuted:NO forChannelGroup:brainSoundGroup];
+    } else {
+        [soundSwitch setOn:NO animated:YES];
+        [audioController setMuted:YES forChannelGroup:brainSoundGroup];
+    }
 }
 
 
@@ -604,6 +621,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         
         if(recordButton.selected)
         {
+
             NSDictionary* data = @{@"x": [NSNumber numberWithDouble: userAcceleration.x],
                                    @"y": [NSNumber numberWithDouble: userAcceleration.y],
                                    @"z": [NSNumber numberWithDouble: userAcceleration.z]};
@@ -613,6 +631,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
             if([events count] > MAX_READINGS) {
                 [events removeObjectAtIndex:0];
             }
+
         }
     }
 }
@@ -664,6 +683,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                                        cancelButtonTitle:@"Okay"
                                        otherButtonTitles:nil];
     [a show];
+    poorSignalValue = 500;
 }
 
 //  This method gets called by the TGAccessoryManager when data is received from the
@@ -848,7 +868,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 5;
+    return 4;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -858,7 +878,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
         case SECTION_CONTROLS: return @"Controls";
         case SECTION_STATUS: return @"Status";
         case SECTION_THINKGEAR: return @"Brain Activity";
-        case SECTION_DEBUG: return @"Debug";
+        //case SECTION_DEBUG: return @"Debug";
         //case SECTION_MOTION: return @"Motion";
         default:
             return [NSString stringWithFormat:@"Section %d", section];
@@ -882,9 +902,9 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
     switch(section) {
         case SECTION_RECORDING: return 2;
         case SECTION_CONTROLS: return 1;
-        case SECTION_STATUS: return 5;
+        case SECTION_STATUS: return 4;
         case SECTION_THINKGEAR: return 11;
-        case SECTION_DEBUG: return 5;
+        //case SECTION_DEBUG: return 5;
         //case SECTION_MOTION: return 5;
         default: return 4;
     }    
@@ -965,14 +985,16 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     [[cell textLabel] setText:@"Connectivity"];
                     [[cell detailTextLabel] setText:connectivityStatus];
                     break;
+                /*
                 case 4:
                     [[cell textLabel] setText:@"Server"];
                     [[cell detailTextLabel] setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"server"]];
                     
                     break;
+                */
             }
             break;
-            
+        /*
         case SECTION_DEBUG:
            
             switch(indexPath.row) {
@@ -998,7 +1020,7 @@ float ofMap(float value, float inputMin, float inputMax, float outputMin, float 
                     break;
             }
             break;
-            
+         */
             
         case SECTION_THINKGEAR:
             switch (indexPath.row) {

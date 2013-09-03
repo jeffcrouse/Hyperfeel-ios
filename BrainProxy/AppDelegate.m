@@ -30,7 +30,7 @@
     
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *appDefaults = @{@"server": @"http://cheese.local:3000",
+    NSDictionary *appDefaults = @{@"server": @"http://brainz.local:3000",
                                   @"sample_rate": [NSNumber numberWithFloat:1]};
     [defaults registerDefaults:appDefaults];
     

@@ -42,7 +42,7 @@
 			<key>KeyboardType</key>
 			<string>URL</string>
 			<key>DefaultValue</key>
-			<string>http://cheese.local:3000</string>
+			<string>http://brainz.local:3000</string>
 		</dict>
 	</array>
 	<key>StringsTable</key>

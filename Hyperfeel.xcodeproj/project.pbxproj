@@ -52,7 +52,6 @@
 		1F7644DD17CE9C3500C7CAD9 /* BrainWave13-Med.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644CC17CE9C3500C7CAD9 /* BrainWave13-Med.wav */; };
 		1F7644DE17CE9C3500C7CAD9 /* BrainWave14-Both.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644CD17CE9C3500C7CAD9 /* BrainWave14-Both.wav */; };
 		1F7644DF17CE9C3500C7CAD9 /* BrainWave15-Med.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644CE17CE9C3500C7CAD9 /* BrainWave15-Med.wav */; };
-		1F7644E017CE9C3500C7CAD9 /* BRainWave16-Attn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644CF17CE9C3500C7CAD9 /* BRainWave16-Attn.wav */; };
 		1F7644E117CE9C3500C7CAD9 /* BrainWave17-Attn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F7644D017CE9C3500C7CAD9 /* BrainWave17-Attn.wav */; };
 		1F98024017C573F1004BDB96 /* libTheAmazingAudioEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F98023D17C573E5004BDB96 /* libTheAmazingAudioEngine.a */; };
 		1F98027117C637E7004BDB96 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F98027017C637E7004BDB96 /* SystemConfiguration.framework */; };
@@ -67,6 +66,7 @@
 		1F98029417C6385C004BDB96 /* ASIInputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98028717C6385C004BDB96 /* ASIInputStream.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F98029517C6385C004BDB96 /* ASINetworkQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98028917C6385C004BDB96 /* ASINetworkQueue.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1F98029617C6385C004BDB96 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F98028D17C6385C004BDB96 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1FAC187217D50CF7001FB324 /* BrainWave16-Attn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FAC187117D50CF7001FB324 /* BrainWave16-Attn.wav */; };
 		1FE9471C17D233DB0094842C /* Button.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FE9471A17D233DB0094842C /* Button.wav */; };
 		1FE9471D17D233DB0094842C /* Tick.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FE9471B17D233DB0094842C /* Tick.wav */; };
 /* End PBXBuildFile section */
@@ -142,7 +142,6 @@
 		1F7644CC17CE9C3500C7CAD9 /* BrainWave13-Med.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BrainWave13-Med.wav"; path = "loops/BrainWave13-Med.wav"; sourceTree = "<group>"; };
 		1F7644CD17CE9C3500C7CAD9 /* BrainWave14-Both.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BrainWave14-Both.wav"; path = "loops/BrainWave14-Both.wav"; sourceTree = "<group>"; };
 		1F7644CE17CE9C3500C7CAD9 /* BrainWave15-Med.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BrainWave15-Med.wav"; path = "loops/BrainWave15-Med.wav"; sourceTree = "<group>"; };
-		1F7644CF17CE9C3500C7CAD9 /* BRainWave16-Attn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BRainWave16-Attn.wav"; path = "loops/BRainWave16-Attn.wav"; sourceTree = "<group>"; };
 		1F7644D017CE9C3500C7CAD9 /* BrainWave17-Attn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BrainWave17-Attn.wav"; path = "loops/BrainWave17-Attn.wav"; sourceTree = "<group>"; };
 		1F98023817C573E5004BDB96 /* TheAmazingAudioEngine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TheAmazingAudioEngine.xcodeproj; path = TheAmazingAudioEngine/TheAmazingAudioEngine.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1F98027017C637E7004BDB96 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -170,6 +169,7 @@
 		1F98028A17C6385C004BDB96 /* ASIProgressDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIProgressDelegate.h; sourceTree = "<group>"; };
 		1F98028C17C6385C004BDB96 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		1F98028D17C6385C004BDB96 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		1FAC187117D50CF7001FB324 /* BrainWave16-Attn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "BrainWave16-Attn.wav"; path = "loops/BrainWave16-Attn.wav"; sourceTree = "<group>"; };
 		1FE9471A17D233DB0094842C /* Button.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Button.wav; path = fx/Button.wav; sourceTree = "<group>"; };
 		1FE9471B17D233DB0094842C /* Tick.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Tick.wav; path = fx/Tick.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -318,7 +318,7 @@
 				1F7644CC17CE9C3500C7CAD9 /* BrainWave13-Med.wav */,
 				1F7644CD17CE9C3500C7CAD9 /* BrainWave14-Both.wav */,
 				1F7644CE17CE9C3500C7CAD9 /* BrainWave15-Med.wav */,
-				1F7644CF17CE9C3500C7CAD9 /* BRainWave16-Attn.wav */,
+				1FAC187117D50CF7001FB324 /* BrainWave16-Attn.wav */,
 				1F7644D017CE9C3500C7CAD9 /* BrainWave17-Attn.wav */,
 			);
 			name = Loops;
@@ -475,7 +475,7 @@
 				1F7644DD17CE9C3500C7CAD9 /* BrainWave13-Med.wav in Resources */,
 				1F7644DE17CE9C3500C7CAD9 /* BrainWave14-Both.wav in Resources */,
 				1F7644DF17CE9C3500C7CAD9 /* BrainWave15-Med.wav in Resources */,
-				1F7644E017CE9C3500C7CAD9 /* BRainWave16-Attn.wav in Resources */,
+				1FAC187217D50CF7001FB324 /* BrainWave16-Attn.wav in Resources */,
 				1F7644E117CE9C3500C7CAD9 /* BrainWave17-Attn.wav in Resources */,
 				1F51A0E717CF6A8D00EFC5FE /* AdjustHeadset.wav in Resources */,
 				1FE9471C17D233DB0094842C /* Button.wav in Resources */,
