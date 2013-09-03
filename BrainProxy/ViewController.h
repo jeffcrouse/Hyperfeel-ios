@@ -22,11 +22,9 @@
 
 
 #define SECTION_RECORDING 0
-#define SECTION_CONTROLS 1
-#define SECTION_STATUS 2
-#define SECTION_DEBUG 3
-#define SECTION_THINKGEAR 4
-//#define SECTION_MOTION 5
+#define SECTION_CONTROLS 3
+#define SECTION_STATUS 1
+#define SECTION_THINKGEAR 2
 
 
 #define ALERT_TAG_ERROR 100
@@ -104,5 +102,5 @@
 
 //@property (nonatomic, retain) AEAudioFilePlayer *blinkSound;
 //@property (nonatomic, retain) AEAudioFilePlayer *shakeSound;
-@property (nonatomic, retain) AEAudioUnitFilter *reverb;
+//@property (nonatomic, retain) AEAudioUnitFilter *reverb;
 @end
